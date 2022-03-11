@@ -1,0 +1,18 @@
+# Jenkins Swarm Client integration for NUT CI farm
+# Copyright (C)
+#   2021-2022 by Jim Klimov <jimklimov+nut@gmail.com>
+# License: MIT
+
+# Mind the build account name and homedir (path, layout) below
+
+[Unit]
+Wants=network.service networking.service
+After=network.service networking.service
+
+[Service]
+User=abuild
+ExecStartPre=-/home/abuild/jenkins-swarm/swarm-client-download.sh
+ExecStart=/home/abuild/jenkins-swarm/swarm-client-nutci.sh
+
+[Install]
+WantedBy=multi-user.target

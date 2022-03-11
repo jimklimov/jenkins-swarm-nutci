@@ -1,0 +1,12 @@
+url: https://ci.networkupstools.org/
+deleteExistingClients: true
+disableClientsUniqueId: true
+jarCache: @SCRIPTDIR@/../.jarcache
+passwordFile: @SCRIPTDIR@/jenkins-swarm-nutci.token
+username: nut-swarm
+mode: exclusive
+labelsFile: jenkins-swarm.labels
+pidFile: jenkins-swarm.pid
+executors: 2
+environmentVariables:
+  PATH+LOCAL: "/usr/lib/ccache"

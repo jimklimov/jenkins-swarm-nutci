@@ -61,10 +61,10 @@ if [ -s ./jenkins-swarm.yml.envlist ] ; then
 	grep -E "^environmentVariables:" "jenkins-swarm.yml" > /dev/null \
 	|| { echo "environmentVariables:" >> "jenkins-swarm.yml"; }
 
-	# Indent with two spaces
-	ENVLIST="`sed 's,^'"${RE_TABSPACE}"'*\(.*\)'"${RE_TABSPACE}"'*$,  \1,' < ./jenkins-swarm.yml.envlist | grep -vE '^  $' | sed -e 's,\n,\\\\n,g'`"
-	sed -e 's~^\(environmentVariables:\)'"${RE_TABSPACE}"'*$~\1\n'"${ENVLIST}"'~' \
-		-i "jenkins-swarm.yml"
+	# Indent with two spaces in a way that works on non-GNU userlands
+	ENVLIST="`sed 's,^'"${RE_TABSPACE}"'*\(.*\)'"${RE_TABSPACE}"'*$,  \1,' < ./jenkins-swarm.yml.envlist* | grep -vE '^  $' | while IFS='' read LINE ; do printf '%sn%s' '\' "$LINE" ; done`"
+	awk '{ if (/^environmentVariables:'"${RE_TABSPACE}"'*$/) {print $0"'"${ENVLIST}"'";} else { print $0 } }' \
+	< "jenkins-swarm.yml"
 fi
 
 if [ -s ./jenkins-swarm.executors ] ; then

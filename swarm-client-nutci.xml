@@ -1,0 +1,46 @@
+<?xml version='1.0'?>
+<!DOCTYPE service_bundle SYSTEM '/usr/share/lib/xml/dtd/service_bundle.dtd.1'>
+<service_bundle type='manifest' name='export'>
+  <service name='application/jenkins/swarm-client' type='service' version='0'>
+    <dependency name='fs-local' grouping='require_all' restart_on='none' type='service'>
+      <service_fmri value='svc:/system/filesystem/local'/>
+    </dependency>
+    <dependency name='network' grouping='require_all' restart_on='none' type='service'>
+      <service_fmri value='svc:/network/physical'/>
+    </dependency>
+
+    <exec_method
+        type='method'
+        name='start'
+        exec='/bin/sh -c "/export/home/abuild/jenkins-swarm/swarm-client-download.sh &amp;&amp; /export/home/abuild/jenkins-swarm/swarm-client-%i.sh"'
+        timeout_seconds='600'>
+        <method_context>
+            <method_credential user='abuild' group='abuild' />
+        </method_context>
+    </exec_method>
+
+    <exec_method
+        type='method'
+        name='stop'
+        exec=':true'
+        timeout_seconds='60' />
+
+    <property_group name='startd' type='framework'>
+        <propval name='duration' type='astring'
+                value='child' />
+    </property_group>
+
+    <instance name='default' enabled='false'/>
+
+    <instance name='nutci' enabled='true'/>
+
+    <stability value='Evolving' />
+
+    <template>
+            <common_name>
+                    <loctext xml:lang='C'>Jenkins Swarm agent client</loctext>
+            </common_name>
+    </template>
+  </service>
+
+</service_bundle>

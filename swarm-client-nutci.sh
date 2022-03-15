@@ -31,6 +31,20 @@ SCRIPTDIR="`cd "$SCRIPTDIR" && pwd`"
 
 cd "$SCRIPTDIR/../jenkins-`hostname`/" || exit
 
+if [ -z "$USER" ] ; then
+	USER="`id -u`" && [ -n "$USER" ] || USER=abuild
+	export USER
+	echo "DETERMINED missing USER: $USER" >&2
+fi
+
+if [ -z "$HOME" ] ; then
+	HOME="`getent passwd "$USER" | awk -F: '{print $6}'`" \
+	&& [ -n "$HOME" ] && [ -d "$HOME" ] \
+	|| HOME=/export/home/abuild
+	export HOME
+	echo "DETERMINED missing HOME: $HOME" >&2
+fi
+
 sed \
 	-e 's,[@]SCRIPTDIR[@],'"${SCRIPTDIR}"',g' \
 	-e 's,[@]HOMEDIR[@],'"${HOME}"',g' \
@@ -50,7 +64,7 @@ if [ -s ./jenkins-swarm.yml.envlist ] ; then
 	# Indent with two spaces
 	ENVLIST="`sed 's,^'"${RE_TABSPACE}"'*\(.*\)'"${RE_TABSPACE}"'*$,  \1,' < ./jenkins-swarm.yml.envlist | grep -vE '^  $' | sed -e 's,\n,\\\\n,g'`"
 	sed -e 's~^\(environmentVariables:\)'"${RE_TABSPACE}"'*$~\1\n'"${ENVLIST}"'~' \
-	    -i "jenkins-swarm.yml"
+		-i "jenkins-swarm.yml"
 fi
 
 if [ -s ./jenkins-swarm.executors ] ; then
@@ -60,7 +74,7 @@ if [ -s ./jenkins-swarm.executors ] ; then
 	EXECUTORS="`head -1 "./jenkins-swarm.executors"`"
 	if [ "$EXECUTORS" -gt 0 ]; then
 		sed -e 's~\(executors:\)'"${RE_TABSPACE}"'*[0-9]*$~\1 '"${EXECUTORS}"'~' \
-		    -i "jenkins-swarm.yml"
+			-i "jenkins-swarm.yml"
 	fi
 fi
 

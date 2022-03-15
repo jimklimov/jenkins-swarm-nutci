@@ -6,6 +6,7 @@
 # License: MIT
 
 # Fetches newest swarm client
+#LASTVER=3.25
 
 BASEURL="https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/"
 
@@ -21,7 +22,7 @@ SCRIPTDIR="`dirname "$0"`"
 SCRIPTDIR="`cd "$SCRIPTDIR" && pwd`"
 cd "$SCRIPTDIR"
 
-LASTVER="`getLastVer`" && [ -n "$LASTVER" ] || exit
+{ [ -n "${LASTVER-}" ] || LASTVER="`getLastVer`" ; } && [ -n "$LASTVER" ] || exit
 if [ -s "swarm-client-${LASTVER}.jar" ] ; then
 	echo "swarm-client-${LASTVER}.jar is the newest published version" >&2
 	exit 0

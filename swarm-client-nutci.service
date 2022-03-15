@@ -10,6 +10,7 @@ Wants=network.service networking.service
 After=network.service networking.service
 
 [Service]
+Restart=always
 User=abuild
 ExecStartPre=-/home/abuild/jenkins-swarm/swarm-client-download.sh
 ExecStart=/home/abuild/jenkins-swarm/swarm-client-nutci.sh

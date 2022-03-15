@@ -64,6 +64,11 @@ if [ -s ./jenkins-swarm.executors ] ; then
 	fi
 fi
 
+if [ -x ./jenkins-swarm-prestart.include ] ; then
+	# e.g. source some PATH to JAVA_HOME
+	. ./jenkins-swarm-prestart.include || exit
+fi
+
 if [ -x ./jenkins-swarm-prestart.sh ] ; then
 	# e.g. local handler to instantiate "workspace" dir in tmpfs
 	./jenkins-swarm-prestart.sh || exit

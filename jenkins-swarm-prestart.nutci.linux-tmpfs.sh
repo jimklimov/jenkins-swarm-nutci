@@ -23,7 +23,9 @@ mkdir -p "${HOME}/.gitcache-dynamatrix@tmp"
 [ -n "$TMPDIR" ] && [ -d "$TMPDIR" ] || TMPDIR=/dev/shm
 [ -n "$TMPDIR" ] && [ -d "$TMPDIR" ] || TMPDIR=/tmp
 if [ -d "$TMPDIR" ] ; then
-    WSDIR="`mktemp -d "$TMPDIR/jenkins-nutci.XXXXXX"`"
+    #WSDIR="`mktemp -d "$TMPDIR/jenkins-nutci.XXXXXX"`"
+    WSDIR="$TMPDIR/jenkins-nutci"
+    mkdir -p "$WSDIR"
     rm -rf workspace
     ln -srf "$WSDIR" ./workspace
 fi

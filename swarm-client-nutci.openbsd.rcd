@@ -1,0 +1,20 @@
+#!/bin/ksh
+#
+# OpenBSD rc.d for jenkins swarm client
+# Symlink as /etc/rc.d/swarm_client_nutci and then
+#   rcctl enable swarm_client_nutci
+#   rcctl start swarm_client_nutci
+
+if [ -d /dev/shm ]; then chmod 1777 /dev/shm ; fi
+
+daemon_user="abuild"
+downloader="/home/abuild/jenkins-swarm/swarm-client-download.sh"
+daemon="nohup /home/abuild/jenkins-swarm/swarm-client-nutci.sh &"
+
+. /etc/rc.d/rc.subr
+
+rc_pre() {
+	${downloader}
+}
+
+rc_cmd $1

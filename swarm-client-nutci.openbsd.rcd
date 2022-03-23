@@ -15,8 +15,11 @@ fi
 if [ -d /dev/shm ]; then chmod 1777 /dev/shm ; fi
 
 daemon_user="abuild"
+touch /var/log/swarm-client-nutci
+chown ${daemon_user} /var/log/swarm-client-nutci
+
 downloader="/home/abuild/jenkins-swarm/swarm-client-download.sh"
-daemon="nohup /home/abuild/jenkins-swarm/swarm-client-nutci.sh &"
+daemon="nohup /home/abuild/jenkins-swarm/swarm-client-nutci.sh >> /var/log/swarm-client-nutci 2>&1 &"
 
 . /etc/rc.d/rc.subr
 

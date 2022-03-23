@@ -78,7 +78,7 @@ if [ -s ./jenkins-swarm.executors ] ; then
 	fi
 fi
 
-if [ -x ./jenkins-swarm-prestart.include ] ; then
+if [ -s ./jenkins-swarm-prestart.include ] ; then
 	# e.g. source some PATH to JAVA_HOME
 	. ./jenkins-swarm-prestart.include || exit
 fi

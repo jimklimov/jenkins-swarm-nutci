@@ -27,4 +27,8 @@ rc_pre() {
 	${downloader}
 }
 
+rc_stop() {
+	kill -15 `ps -xawwu | grep java | grep swarm-client | grep ${daemon_user} | awk '{print $1}'`
+}
+
 rc_cmd $1

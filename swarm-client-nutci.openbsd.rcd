@@ -5,6 +5,13 @@
 #   rcctl enable swarm_client_nutci
 #   rcctl start swarm_client_nutci
 
+# These lines run as root, regardless of daemon_user
+if [ -n "`/sbin/mount | grep /dev/shm`" ] ; then : ; else
+    # This can be automated in /etc/fstab with such line:
+    #   swap /dev/shm mfs rw,nodev,nosuid,-s=1536000 0 0
+    mkdir /dev/shm
+    /sbin/mount_mfs -o rw,nodev,nosuid,-s=1536000 swap /dev/shm
+fi
 if [ -d /dev/shm ]; then chmod 1777 /dev/shm ; fi
 
 daemon_user="abuild"

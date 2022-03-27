@@ -25,7 +25,7 @@ fi 1>"$TEMP/json-api.out" 2>"$TEMP/json-api.err"
 if grep -E '^(< H|H)TTP.* 200' "$TEMP/json-api.err" >/dev/null ; then
     # Parse JSON
     if grep '"offline":true' "$TEMP/json-api.out" >/dev/null \
-    || grep '"temporarilyOffline":false' "$TEMP/json-api.out" >/dev/null \
+    && grep '"temporarilyOffline":false' "$TEMP/json-api.out" >/dev/null \
     ; then
         echo "VERDICT: Query for $API_URL returned HTTP/200 and JSON indicates the agent is known, offline, and not administratively downed (not temporarilyOffline)" >&2
         if grep 'OfflineCause$LaunchFailed' "$TEMP/json-api.out" >/dev/null ; then
@@ -33,6 +33,8 @@ if grep -E '^(< H|H)TTP.* 200' "$TEMP/json-api.err" >/dev/null ; then
             exit 43
         fi
     fi
+    # else the agent is online okay or administratively down
+    exit 0
 else
     if grep -E '^(< H|H)TTP.* 404' "$TEMP/json-api.err" >/dev/null ; then
         echo "VERDICT: Query for $API_URL returned HTTP/404 - assuming node is not recognized" >&2

@@ -28,7 +28,11 @@ rc_pre() {
 }
 
 rc_stop() {
-	kill -15 `ps -xawwu | grep java | grep swarm-client | grep ${daemon_user} | awk '{print $1}'`
+	kill -15 `ps -xawwu | grep java | grep swarm-client | grep ${daemon_user} | awk '{print $2}'`
+}
+
+rc_check() {
+	ps -xawwu | grep java | grep swarm-client | grep ${daemon_user} | awk '{print $2}'
 }
 
 rc_cmd $1

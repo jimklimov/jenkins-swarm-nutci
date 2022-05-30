@@ -5,6 +5,10 @@
 #   rcctl enable swarm_client_nutci
 #   rcctl start swarm_client_nutci
 
+#exec >> /var/log/swarm_client_nutci.rcctl.log 2>&1
+#echo "===== `date`: $0 $*"
+#set -x
+
 # These lines run as root, regardless of daemon_user
 if [ -n "`/sbin/mount | grep /dev/shm`" ] ; then : ; else
     # This can be automated in /etc/fstab with such line:
@@ -18,16 +22,21 @@ daemon_user="abuild"
 touch /var/log/swarm-client-nutci
 chown ${daemon_user} /var/log/swarm-client-nutci
 
-downloader="/home/abuild/jenkins-swarm/swarm-client-download.sh"
-daemon="nohup /home/abuild/jenkins-swarm/swarm-client-nutci.sh >> /var/log/swarm-client-nutci 2>&1 &"
+downloader="/home/abuild/jenkins-swarm/swarm-client-download.sh >> /var/log/swarm-client-nutci 2>&1"
+daemon="cd /dev/shm && nohup /home/abuild/jenkins-swarm/swarm-client-nutci.sh >> /var/log/swarm-client-nutci 2>&1 &"
 
 . /etc/rc.d/rc.subr
 
 rc_pre() {
-	${downloader}
+	echo "`date`: Starting $0" >> /var/log/swarm-client-nutci
+#	exec >> /var/log/swarm_client_nutci.rcctl.log 2>&1
+#	set -x
+#	set -v
+	PATH="$PATH:/usr/local/sbin:/usr/local/bin" ${downloader}
 }
 
 rc_stop() {
+	echo "`date`: Stopping $0" >> /var/log/swarm-client-nutci
 	kill -15 `ps -xawwu | grep java | grep swarm-client | grep ${daemon_user} | awk '{print $2}'`
 }
 

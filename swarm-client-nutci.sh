@@ -80,12 +80,18 @@ fi
 
 if [ -s ./jenkins-swarm-prestart.include ] ; then
 	# e.g. source some PATH to JAVA_HOME
+	echo "SOURCING `pwd`/jenkins-swarm-prestart.include"
 	. ./jenkins-swarm-prestart.include || exit
+else
+	echo "NOT SOURCING `pwd`/jenkins-swarm-prestart.include (absent or empty)"
 fi
 
 if [ -x ./jenkins-swarm-prestart.sh ] ; then
 	# e.g. local handler to instantiate "workspace" dir in tmpfs
+	echo "RUNNING `pwd`/jenkins-swarm-prestart.sh"
 	./jenkins-swarm-prestart.sh || exit
+else
+	echo "NOT RUNNING `pwd`/jenkins-swarm-prestart.sh (absent or not executable)"
 fi
 
 exec java -jar "`ls -1 "$SCRIPTDIR"/swarm-client-*.jar | sort -n | tail -1`" \

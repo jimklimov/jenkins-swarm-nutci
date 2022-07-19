@@ -32,14 +32,16 @@ if [ -d "$TMPDIR" ] ; then
 fi
 
 if [ -d ./workspace/.gitcache-dynamatrix ] || [ -L ./workspace/.gitcache-dynamatrix ] || [ -h ./workspace/.gitcache-dynamatrix ] ;
-then : else
+then :
+else
     rm -f ./workspace/.gitcache-dynamatrix
     ln -srf "${HOME}/.gitcache-dynamatrix" ./workspace/.gitcache-dynamatrix 2>/dev/null \
     || ln -sf "${HOME}/.gitcache-dynamatrix" ./workspace/.gitcache-dynamatrix
 fi
 
 if [ -d "./workspace/.gitcache-dynamatrix@tmp" ] || [ -L "./workspace/.gitcache-dynamatrix@tmp" ] || [ -h "./workspace/.gitcache-dynamatrix@tmp" ] ;
-then : else
+then :
+else
     rm -f "./workspace/.gitcache-dynamatrix@tmp"
     ln -srf "${HOME}/.gitcache-dynamatrix@tmp" "./workspace/.gitcache-dynamatrix@tmp" 2>/dev/null \
     || ln -sf "${HOME}/.gitcache-dynamatrix@tmp" "./workspace/.gitcache-dynamatrix@tmp"

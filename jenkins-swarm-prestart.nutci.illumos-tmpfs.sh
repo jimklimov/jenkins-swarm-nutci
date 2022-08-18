@@ -1,6 +1,10 @@
 #!/bin/sh
 
 sed -e 's,^pidFile:.*$,,' -i jenkins-swarm.yml
+cat >> jenkins-swarm.yml << EOF
+keepDisconnectedClients: false
+webSocket: false
+EOF
 
 # Need GNU ln for script below
 PATH="/usr/gnu/bin:$PATH"

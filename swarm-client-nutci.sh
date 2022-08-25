@@ -64,7 +64,9 @@ if [ -s ./jenkins-swarm.yml.envlist ] ; then
 	# Indent with two spaces in a way that works on non-GNU userlands
 	ENVLIST="`sed 's,^'"${RE_TABSPACE}"'*\(.*\)'"${RE_TABSPACE}"'*$,  \1,' < ./jenkins-swarm.yml.envlist | grep -vE '^  $' | while IFS='' read LINE ; do printf '%sn%s' '\' "$LINE" ; done`"
 	awk '{ if (/^environmentVariables:'"${RE_TABSPACE}"'*$/) {print $0"'"${ENVLIST}"'";} else { print $0 } }' \
-	< "jenkins-swarm.yml"
+	< "jenkins-swarm.yml" > "jenkins-swarm.yml.tmp" \
+	&& mv -f "jenkins-swarm.yml.tmp" "jenkins-swarm.yml" \
+	|| exit
 fi
 
 if [ -s ./jenkins-swarm.executors ] ; then
@@ -74,7 +76,7 @@ if [ -s ./jenkins-swarm.executors ] ; then
 	EXECUTORS="`head -1 "./jenkins-swarm.executors"`"
 	if [ "$EXECUTORS" -gt 0 ]; then
 		sed -e 's~\(executors:\)'"${RE_TABSPACE}"'*[0-9]*$~\1 '"${EXECUTORS}"'~' \
-			-i "jenkins-swarm.yml"
+			-i.bak "jenkins-swarm.yml"
 	fi
 fi
 

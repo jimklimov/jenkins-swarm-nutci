@@ -1,6 +1,6 @@
 #!/bin/sh
 
-sed -e 's,^pidFile:.*$,,' -i jenkins-swarm.yml
+sed -e 's,^pidFile:.*$,,' -i.bak jenkins-swarm.yml
 cat >> jenkins-swarm.yml << EOF
 keepDisconnectedClients: false
 webSocket: false

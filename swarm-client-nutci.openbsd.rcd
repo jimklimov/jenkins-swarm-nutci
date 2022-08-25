@@ -27,6 +27,8 @@ daemon="/home/abuild/jenkins-swarm/swarm-client-nutci.sh"
 #daemon="cd /dev/shm && nohup /home/abuild/jenkins-swarm/swarm-client-nutci.sh >> /var/log/swarm-client-nutci 2>&1 &"
 #daemon="/bin/sh -c \\' cd /dev/shm && nohup /home/abuild/jenkins-swarm/swarm-client-nutci.sh >> /var/log/swarm-client-nutci 2>&1 \\' &"
 
+# Allow to restart the service on command line (or via rcctl)
+INRC=1
 . /etc/rc.d/rc.subr
 
 rc_pre() {

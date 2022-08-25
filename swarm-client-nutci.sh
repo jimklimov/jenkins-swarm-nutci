@@ -96,5 +96,13 @@ else
 	echo "NOT RUNNING `pwd`/jenkins-swarm-prestart.sh (absent or not executable)"
 fi
 
+echo "=== Debug: jenkins-swarm.yml:"
+cat "jenkins-swarm.yml"
+
+echo "=== Debug: jenkins-swarm.labels:"
+cat "jenkins-swarm.labels" || true
+
+echo "=== Launching Java:"
+set -x
 exec java -jar "`ls -1 "$SCRIPTDIR"/swarm-client-*.jar | sort -n | tail -1`" \
 	-config "jenkins-swarm.yml"

@@ -23,7 +23,9 @@ touch /var/log/swarm-client-nutci
 chown ${daemon_user} /var/log/swarm-client-nutci
 
 downloader="/home/abuild/jenkins-swarm/swarm-client-download.sh >> /var/log/swarm-client-nutci 2>&1"
-daemon="cd /dev/shm && nohup /home/abuild/jenkins-swarm/swarm-client-nutci.sh >> /var/log/swarm-client-nutci 2>&1 &"
+daemon="/home/abuild/jenkins-swarm/swarm-client-nutci.sh"
+#daemon="cd /dev/shm && nohup /home/abuild/jenkins-swarm/swarm-client-nutci.sh >> /var/log/swarm-client-nutci 2>&1 &"
+#daemon="/bin/sh -c \\' cd /dev/shm && nohup /home/abuild/jenkins-swarm/swarm-client-nutci.sh >> /var/log/swarm-client-nutci 2>&1 \\' &"
 
 . /etc/rc.d/rc.subr
 
@@ -33,6 +35,11 @@ rc_pre() {
 #	set -x
 #	set -v
 	PATH="$PATH:/usr/local/sbin:/usr/local/bin" ${downloader}
+	#cd /dev/shm || exit
+}
+
+rc_start() {
+	cd /dev/shm && nohup su - ${daemon_user} -c /home/abuild/jenkins-swarm/swarm-client-nutci.sh >> /var/log/swarm-client-nutci 2>&1 &
 }
 
 rc_stop() {
@@ -44,4 +51,5 @@ rc_check() {
 	ps -xawwu | grep java | grep swarm-client | grep ${daemon_user} | awk '{print $2}'
 }
 
+#set -x
 rc_cmd $1

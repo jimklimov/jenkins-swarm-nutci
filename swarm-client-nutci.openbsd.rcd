@@ -22,6 +22,10 @@ daemon_user="abuild"
 touch /var/log/swarm-client-nutci
 chown ${daemon_user} /var/log/swarm-client-nutci
 
+# allow larger resource limits (consider even "daemon" for unlimited?)
+# see /etc/login.conf for standard definitions
+usermod -L pbuild ${daemon_user}
+
 downloader="/home/abuild/jenkins-swarm/swarm-client-download.sh >> /var/log/swarm-client-nutci 2>&1"
 daemon="/home/abuild/jenkins-swarm/swarm-client-nutci.sh"
 #daemon="cd /dev/shm && nohup /home/abuild/jenkins-swarm/swarm-client-nutci.sh >> /var/log/swarm-client-nutci 2>&1 &"
@@ -41,7 +45,8 @@ rc_pre() {
 }
 
 rc_start() {
-	cd /dev/shm && nohup su - ${daemon_user} -c /home/abuild/jenkins-swarm/swarm-client-nutci.sh >> /var/log/swarm-client-nutci 2>&1 &
+	# Leading single-token no-op due to shell inlining peculiarities generally
+	cd /dev/shm && nohup su - ${daemon_user} -cx ' true; ulimit -a >&2; /home/abuild/jenkins-swarm/swarm-client-nutci.sh' >> /var/log/swarm-client-nutci 2>&1 &
 }
 
 rc_stop() {

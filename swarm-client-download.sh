@@ -5,7 +5,8 @@
 #   2021-2023 by Jim Klimov <jimklimov+nut@gmail.com>
 # License: MIT
 
-# Fetches newest swarm client
+# Settings below can be overridden by optional "swarm-client-download.conf":
+# Fetches newest swarm client build, e.g.:
 #LASTVER=3.25
 #LASTVER=PR493-1
 
@@ -22,6 +23,10 @@ getLastVer() {
 SCRIPTDIR="`dirname "$0"`"
 SCRIPTDIR="`cd "$SCRIPTDIR" && pwd`"
 cd "$SCRIPTDIR"
+
+if [ -s "swarm-client-download.conf" ]; then
+	. "swarm-client-download.conf" || exit
+fi
 
 { [ -n "${LASTVER-}" ] || LASTVER="`getLastVer`" ; } && [ -n "$LASTVER" ] || exit
 if [ -s "swarm-client-${LASTVER}.jar" ] ; then

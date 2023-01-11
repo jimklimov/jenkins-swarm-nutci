@@ -2,16 +2,17 @@
 
 # Jenkins Swarm Client integration for NUT CI farm
 # Copyright (C)
-#   2021-2022 by Jim Klimov <jimklimov+nut@gmail.com>
+#   2021-2023 by Jim Klimov <jimklimov+nut@gmail.com>
 # License: MIT
 
 # Fetches newest swarm client
 #LASTVER=3.25
+#LASTVER=PR493-1
 
 BASEURL="https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/"
 
 getLastVer() {
-	( curl -s "${BASEURL}" || wget -O - "${BASEURL}" ) \
+	( curl -sL "${BASEURL}" || wget -O - "${BASEURL}" ) \
 	| grep -E '<a href="[0-9]+\.[0-9]+/">' \
 	| sed 's,^.*a href="\([0-9][0-9]*\.[0-9][0-9]*\)/*".*$,\1,' \
 	| sort -t. -k1,1n -k2,2n \
@@ -31,6 +32,6 @@ fi
 JARURL="${BASEURL}/${LASTVER}/swarm-client-${LASTVER}.jar"
 
 echo "Fetching $JARURL" >&2
-( curl -s "${JARURL}" > "swarm-client-${LASTVER}.jar.tmp" ) \
-|| ( wget -O "swarm-client-${LASTVER}.jar.tmp" "${JARURL}" ) \
+(  ( curl -sL "${JARURL}" > "swarm-client-${LASTVER}.jar.tmp" && [ -s "swarm-client-${LASTVER}.jar.tmp" ] ) \
+|| ( wget -O "swarm-client-${LASTVER}.jar.tmp" "${JARURL}" && [ -s "swarm-client-${LASTVER}.jar.tmp" ] ) ) \
 && mv -f "swarm-client-${LASTVER}.jar.tmp" "swarm-client-${LASTVER}.jar"

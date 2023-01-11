@@ -32,6 +32,8 @@ fi
 JARURL="${BASEURL}/${LASTVER}/swarm-client-${LASTVER}.jar"
 
 echo "Fetching $JARURL" >&2
-(  ( curl -sL "${JARURL}" > "swarm-client-${LASTVER}.jar.tmp" && [ -s "swarm-client-${LASTVER}.jar.tmp" ] ) \
-|| ( wget -O "swarm-client-${LASTVER}.jar.tmp" "${JARURL}" && [ -s "swarm-client-${LASTVER}.jar.tmp" ] ) ) \
-&& mv -f "swarm-client-${LASTVER}.jar.tmp" "swarm-client-${LASTVER}.jar"
+# Let several runners coexist in same homedir... somehow
+JARTMP="swarm-client-${LASTVER}.jar.$$.tmp"
+(  ( curl -sL "${JARURL}" > "${JARTMP}" && [ -s "${JARTMP}" ] ) \
+|| ( wget -O "${JARTMP}" "${JARURL}" && [ -s "${JARTMP}" ] ) ) \
+&& mv -f "${JARTMP}" "swarm-client-${LASTVER}.jar"

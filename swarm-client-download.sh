@@ -24,8 +24,9 @@ SCRIPTDIR="`dirname "$0"`"
 SCRIPTDIR="`cd "$SCRIPTDIR" && pwd`"
 cd "$SCRIPTDIR"
 
-if [ -s "swarm-client-download.conf" ]; then
-	. "swarm-client-download.conf" || exit
+if [ -s "./swarm-client-download.conf" ]; then
+	ls -la "`pwd`/swarm-client-download.conf"
+	. "./swarm-client-download.conf" || exit
 fi
 
 { [ -n "${LASTVER-}" ] || LASTVER="`getLastVer`" ; } && [ -n "$LASTVER" ] || exit

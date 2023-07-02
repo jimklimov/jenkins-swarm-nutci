@@ -2,7 +2,7 @@
 
 # Jenkins Swarm Client integration for NUT CI farm
 # Copyright (C)
-#   2021-2022 by Jim Klimov <jimklimov+nut@gmail.com>
+#   2021-2023 by Jim Klimov <jimklimov+nut@gmail.com>
 # License: MIT
 
 # Launcher for Jenkins swarm agent (can do with shared homedir)
@@ -102,7 +102,12 @@ cat "jenkins-swarm.yml"
 echo "=== Debug: jenkins-swarm.labels:"
 cat "jenkins-swarm.labels" || true
 
-echo "=== Launching Java:"
+# Note: This may be not the "LASTVER" downloaded by swarm-client-download.sh
+# e.g. if you "game the system" temporarily to try custom builds named like
+#   swarm-client-99999-growingNumbers.jar
+[ -n "${PREFERJAR-}" ] || PREFERJAR="`ls -1 "$SCRIPTDIR"/swarm-client-*.jar | sort -n | tail -1`"
+
+echo "=== Launching Java for $PREFERJAR:"
 set -x
-exec java -jar "`ls -1 "$SCRIPTDIR"/swarm-client-*.jar | sort -n | tail -1`" \
+exec java -jar "$PREFERJAR" \
 	-config "jenkins-swarm.yml"

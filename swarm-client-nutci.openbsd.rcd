@@ -47,15 +47,19 @@ rc_pre() {
 rc_start() {
 	# Leading single-token no-op due to shell inlining peculiarities generally
 	cd /dev/shm && nohup su - ${daemon_user} -cx ' true; ulimit -a >&2; /home/abuild/jenkins-swarm/swarm-client-nutci.sh' >> /var/log/swarm-client-nutci 2>&1 &
+	sleep 2
+	rc_check
 }
 
 rc_stop() {
 	echo "`date`: Stopping $0" >> /var/log/swarm-client-nutci
-	kill -15 `ps -xawwu | grep java | grep swarm-client | grep ${daemon_user} | awk '{print $2}'`
+	kill -15 `ps -xawwu | grep java | grep swarm-client | grep "${daemon_user}" | awk '{print $2}'`
+	while test -n "`rc_check`" ; do sleep 2 ; done
+	return 0
 }
 
 rc_check() {
-	ps -xawwu | grep java | grep swarm-client | grep ${daemon_user} | awk '{print $2}'
+	ps -xawwu | grep java | grep swarm-client | grep "${daemon_user}" | awk '{print $2}'
 }
 
 #set -x

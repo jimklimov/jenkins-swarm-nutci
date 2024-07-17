@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  MacOS launchd service manifest for Jenkins Swarm client (aiming for NUT CI farm)
+
+  Inspired by:
+  * https://somesh-rokz.medium.com/how-to-create-services-in-macos-using-bash-launchctl-and-plutil-commands-step-by-step-guide-d736d25cdeeb
+  * https://serverfault.com/questions/194832/how-to-start-stop-restart-launchd-services-from-the-command-line
+  * https://gist.github.com/johndturn/09a5c055e6a56ab61212204607940fa0
+
+  * If you customize it, check with `plutil -lint swarm-client-nutci.plist`
+  * Copy into system: `sudo cp org.nutci.swarm-client-nutci.plist /Library/LaunchDaemons/`
+    - NOTE: /System/Library/... documented elsewhere is read-only on modern MacOS
+  * Register with `sudo launchctl load /Library/LaunchDaemons/org.nutci.swarm-client-nutci.plist`
+    - If iterating this, you may first need to unregister with
+      `sudo launchctl unload /Library/LaunchDaemons/org.nutci.swarm-client-nutci.plist`
+  * Manage with `sudo launchctl start org.nutci.swarm-client-nutci` etc.
+  * Check with `sudo launchctl list | grep swarm` to see if it registered at all (and if is running or failed)
+  * For more details, if registered, `sudo launchctl list org.nutci.swarm-client-nutci`
+  -->
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>org.nutci.swarm-client-nutci</string>
+
+    <key>ServiceDescription</key>
+    <string>Jenkins Swarm client (aiming for NUT CI farm)</string>
+
+    <key>UserName</key>
+    <string>abuild</string>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/abuild/jenkins-swarm</string>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/jenkins-swarm-nutci.log</string>
+
+<!--
+    <key>Program</key>
+    <string>/bin/bash</string>
+-->
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-c</string>
+        <string>/Users/abuild/jenkins-swarm/swarm-client-download.sh &amp;&amp; /Users/abuild/jenkins-swarm/swarm-client-nutci.sh</string>
+    </array>
+
+<!--
+    <key>StartInterval</key>
+    <integer>3600</integer>
+  -->
+
+    <key>RunAtLoad</key>
+    <true />
+  </dict>
+</plist>

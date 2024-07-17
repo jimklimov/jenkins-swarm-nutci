@@ -16,6 +16,8 @@
 #   SCRIPTDIR/../jenkins-`hostname`/
 #   SCRIPTDIR/../jenkins-`hostname`/jenkins-swarm.labels
 #   SCRIPTDIR/../jenkins-`hostname`/jenkins-swarm.yml.envlist (optional, `ENVVAR: "value"` per line)
+#   SCRIPTDIR/../jenkins-`hostname`/jenkins-swarm-prestart.include-early (optional, export whatever local envvars needed for this script)
+#   SCRIPTDIR/../jenkins-`hostname`/jenkins-swarm-prestart.include (optional, export whatever local envvars needed just before java launch)
 #   SCRIPTDIR/../jenkins-`hostname`/jenkins-swarm-prestart.sh (optional, do whatever local logic needed)
 #   e.g. symlink to SCRIPTDIR/jenkins-swarm-prestart.nutci.linux-tmpfs.sh
 #
@@ -29,7 +31,19 @@
 SCRIPTDIR="`dirname "$0"`"
 SCRIPTDIR="`cd "$SCRIPTDIR" && pwd`"
 
-cd "$SCRIPTDIR/../jenkins-`hostname`/" || exit
+# NOTE: At this point we may not know the AGENT_NAME from a config file
+# but may have it from service unit configuration etc. Normally we get
+# (or reset) it with jenkins-swarm-prestart.include-early file.
+[ -n "${AGENT_NAME-}" ] || AGENT_NAME="`hostname | sed 's,\..*$,,'`"
+cd "$SCRIPTDIR/../jenkins-${AGENT_NAME}/" || exit
+
+if [ -s ./jenkins-swarm-prestart.include-early ] ; then
+	# e.g. source some custom AGENT_NAME, custom PATH to GNU toolkit, etc.
+	echo "SOURCING `pwd`/jenkins-swarm-prestart.include-early"
+	. ./jenkins-swarm-prestart.include-early || exit
+else
+	echo "NOT SOURCING `pwd`/jenkins-swarm-prestart.include-early (absent or empty)"
+fi
 
 if [ -z "$USER" ] ; then
 	USER="`id -u`" && [ -n "$USER" ] || USER=abuild
@@ -52,8 +66,8 @@ sed \
 	< "$SCRIPTDIR/jenkins-swarm-nutci.yml.in" > "jenkins-swarm.yml"
 
 cat >> "jenkins-swarm.yml" << EOF
-name: "`hostname | sed 's,\..*$,,'`"
-description: "NUT CI swarm worker from `hostname | sed 's,\..*$,,'` launched `date -u`"
+name: "${AGENT_NAME-}"
+description: "NUT CI swarm worker from ${AGENT_NAME-} launched `date -u`"
 EOF
 
 RE_TABSPACE="`printf '[\t ]'`"

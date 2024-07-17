@@ -1,0 +1,16 @@
+# Export paths to platform-dependent HomeBrew location on MacOS
+# (if not yet done by shell profile, earlier calls to this file, etc.)
+
+if [ -z "${HOMEBREW_PREFIX}" ] ; then
+    BREW=""
+    for B in brew /usr/local/bin/brew /opt/homebrew/bin/brew ; do
+        [ -x "$B" ] && BREW="$B" && break
+        command -v "$B" && BREW="`command -v "$B"`" && break
+    done
+    [ -n "$BREW" ] && [ -x "$BREW" ] || { echo "ERROR: HomeBrew not found on this system" >&2 ; exit 1; }
+
+    HOMEBREW_NO_AUTO_UPDATE=1; export HOMEBREW_NO_AUTO_UPDATE;
+    HOMEBREW_NO_INSTALL_CLEANUP=1; export HOMEBREW_NO_INSTALL_CLEANUP;
+
+    eval "$($BREW shellenv)"
+fi

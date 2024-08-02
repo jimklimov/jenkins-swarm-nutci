@@ -17,6 +17,11 @@ While this particular repository is maintained with the NUT CI farm in
 mind, no specific configuration is stored here. Direct use or forks are
 welcome with other FOSS projects.
 
+While this project is provided under the terms of MIT license (same as
+Jenkins itself) and can be re-used in other efforts without practical
+restrictions, any feedback and upstreaming of interesting hacks are
+welcome.
+
 For more practical details about the typical agent configuration see:
 
 * https://github.com/networkupstools/nut/blob/master/docs/ci-farm-lxc-setup.txt

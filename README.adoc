@@ -1,0 +1,26 @@
+Jenkins-Swarm (NUT CI)
+======================
+
+This is a wrapper project for
+link:https://plugins.jenkins.io/swarm/[Jenkins Swarm]
+build agents that can dial in to a 
+link:https://www.jenkins.io/[Jenkins]
+controller and proclaim their abilities via labels.
+
+Primary use-case is along with the
+link:https://github.com/networkupstools/jenkins-dynamatrix[jenkins-dynamatrix JSL],
+for such agents to be included in the dynamically generated matrix for
+the benefit of next upcoming builds of a project the agent owner wishes
+to participate in, such as the NUT CI farm.
+
+While this particular repository is maintained with the NUT CI farm in
+mind, no specific configuration is stored here. Direct use or forks are
+welcome with other FOSS projects.
+
+For more practical details about the typical agent configuration see:
+
+* https://github.com/networkupstools/nut/blob/master/docs/ci-farm-lxc-setup.txt
+* https://github.com/networkupstools/nut/blob/master/docs/config-prereqs.txt
+
+TODO: Currently the best source of information are the scripts (comments
+and/or code). Some of that belongs in this README, PRs are welcome.

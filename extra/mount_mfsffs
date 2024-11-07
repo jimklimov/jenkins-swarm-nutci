@@ -1,0 +1,100 @@
+#!/bin/sh
+
+# Inspired by https://misc.openbsd.narkive.com/HS72Mz9X/cannot-nfs-mount-an-mfs
+# Scripting (C) 2024 by Jim Klimov
+#
+# Mount normal FFS over MFS (RAM disk with swapping support)
+# so it can be shared over NFS from the OpenBSD server.
+# Install into /sbin/mount_mfsffs
+#
+# Can use CLI arg "-u" to only unmount the frankenfs and release the VNDDEV,
+# and use options including "-s" to pass the size (as 512-byte block count).
+#
+# FIXME: FFSOPT is currently hard-coded
+#
+# /etc/fstab
+#   swap /tmp/shm mfsffs rw,nodev,-s=2048000 0 0
+
+set -e
+
+[ x"$UMOUNT_ONLY" = xtrue ] || UMOUNT_ONLY=false
+[ -n "$VNDDEV" ] || VNDDEV=vnd0
+
+SIZE=1536000
+MFSMPT=""
+# FIXME: Extract from args
+FFSOPT="rw,nodev,nosuid"
+while [ $# -gt 1 ] ; do
+    case "$1" in
+        *-s=*)
+            SIZE="`echo "$1" | sed -e 's/^.*-s=\([0-9][0-9]*\)/\1/' -e 's/\([0-9][0-9]*\)[^0-9].*/\1/'`"
+            ;;
+        -s)
+            SIZE="$2"
+            shift
+            ;;
+        /*)
+            if [ $# = 2 ]; then
+                MFSMPT="$1"
+            fi
+            ;;
+        -u|-U) UMOUNT_ONLY=true ;;
+    esac
+    shift
+done
+MPT="$1"
+
+[ "$SIZE" -gt 0 ] || exit
+case "${MPT}" in
+    /*) ;;
+    *) exit ;;
+esac
+
+[ -n "${MFSMPT}" ] && [ x"${MFSMPT}" != xswap ] && [ -d "${MFSMPT}" ] || MFSMPT="`mktemp -d`"
+case "${MFSMPT}" in
+    /*) ;;
+    *) exit ;;
+esac
+
+OLDPATH="`vnconfig -l | grep "${VNDDEV}:" | awk '{print $3}'`" || OLDPATH=""
+
+umount "${MPT}" || true
+case "${OLDPATH}" in
+    */image)
+        umount "${OLDPATH}" || true
+        ;;
+esac
+
+vnconfig -u "/dev/${VNDDEV}c" || true
+
+umount "${MFSMPT}" || true
+case "${OLDPATH}" in
+    */image)
+        # dirname?
+        OLDMPT="`echo "${OLDPATH}" | sed 's,/image,,'`"
+        umount "${OLDMPT}" || true
+        case "$OLDMPT" in
+            "${TMPDIR}"/*) rm -rf "$OLDMPT" || true ;;
+        esac
+        ;;
+esac
+
+if $UMOUNT_ONLY ; then exit ; fi
+
+mount_mfs -o rw,nodev,nosuid -s "${SIZE}" swap "$MFSMPT"
+
+dd if=/dev/zero of="$MFSMPT"/image bs=64k || true
+
+vnconfig "/dev/${VNDDEV}c" "$MFSMPT"/image
+#vnconfig -l
+
+#yes "" | \
+    fdisk -yi "/dev/r${VNDDEV}c"
+
+printf 'a\na\n\n\n\nw\nq\n' | sudo disklabel -E "/dev/r${VNDDEV}c"
+
+newfs "/dev/r${VNDDEV}a"
+
+mount -o "$FFSOPT" "/dev/${VNDDEV}a" "${MPT}"
+
+rcctl reload mountd || true

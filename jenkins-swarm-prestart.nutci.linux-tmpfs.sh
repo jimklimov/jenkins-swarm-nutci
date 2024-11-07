@@ -2,7 +2,7 @@
 
 # Jenkins Swarm Client integration for NUT CI farm
 # Copyright (C)
-#   2021-2022 by Jim Klimov <jimklimov+nut@gmail.com>
+#   2021-2024 by Jim Klimov <jimklimov+nut@gmail.com>
 # License: MIT
 
 # Intended to be symlinked as
@@ -16,9 +16,13 @@ SCRIPTDIR="`cd "$SCRIPTDIR" && pwd`"
 
 cd "$SCRIPTDIR"
 
+# NOTE: Some co-located deployments may want a `hostname` suffix etc. here.
+# Can be done via export in their individual `jenkins-swarm-prestart.sh` files.
+[ -n "${GITCACHE_DYNAMATRIX_PERSISTENT}" ] || GITCACHE_DYNAMATRIX_PERSISTENT="${HOME}/.gitcache-dynamatrix"
+
 mkdir -p "${HOME}/.ccache"
-mkdir -p "${HOME}/.gitcache-dynamatrix"
-mkdir -p "${HOME}/.gitcache-dynamatrix@tmp"
+mkdir -p "${GITCACHE_DYNAMATRIX_PERSISTENT}"
+mkdir -p "${GITCACHE_DYNAMATRIX_PERSISTENT}@tmp"
 
 [ -n "$TMPDIR" ] && [ -d "$TMPDIR" ] || TMPDIR=/dev/shm
 [ -n "$TMPDIR" ] && [ -d "$TMPDIR" ] || TMPDIR=/tmp
@@ -35,14 +39,14 @@ if [ -d ./workspace/.gitcache-dynamatrix ] || [ -L ./workspace/.gitcache-dynamat
 then :
 else
     rm -f ./workspace/.gitcache-dynamatrix
-    ln -srf "${HOME}/.gitcache-dynamatrix" ./workspace/.gitcache-dynamatrix 2>/dev/null \
-    || ln -sf "${HOME}/.gitcache-dynamatrix" ./workspace/.gitcache-dynamatrix
+    ln -srf "${GITCACHE_DYNAMATRIX_PERSISTENT}" ./workspace/.gitcache-dynamatrix 2>/dev/null \
+    || ln -sf "${GITCACHE_DYNAMATRIX_PERSISTENT}" ./workspace/.gitcache-dynamatrix
 fi
 
 if [ -d "./workspace/.gitcache-dynamatrix@tmp" ] || [ -L "./workspace/.gitcache-dynamatrix@tmp" ] || [ -h "./workspace/.gitcache-dynamatrix@tmp" ] ;
 then :
 else
     rm -f "./workspace/.gitcache-dynamatrix@tmp"
-    ln -srf "${HOME}/.gitcache-dynamatrix@tmp" "./workspace/.gitcache-dynamatrix@tmp" 2>/dev/null \
-    || ln -sf "${HOME}/.gitcache-dynamatrix@tmp" "./workspace/.gitcache-dynamatrix@tmp"
+    ln -srf "${GITCACHE_DYNAMATRIX_PERSISTENT}@tmp" "./workspace/.gitcache-dynamatrix@tmp" 2>/dev/null \
+    || ln -sf "${GITCACHE_DYNAMATRIX_PERSISTENT}@tmp" "./workspace/.gitcache-dynamatrix@tmp"
 fi

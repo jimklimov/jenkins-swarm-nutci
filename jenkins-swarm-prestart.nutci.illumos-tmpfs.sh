@@ -10,7 +10,8 @@ EOF
 PATH="/usr/gnu/bin:$PATH"
 export PATH
 
-TMPDIR=/tmp/jenkins-swarm
+[ -n "$TMPDIR" ] && [ -d "$TMPDIR" ] || TMPDIR="${SHMDIR}"
+[ -n "$TMPDIR" ] && [ -d "$TMPDIR" ] || TMPDIR=/tmp/jenkins-swarm
 mkdir -p "$TMPDIR" || exit
 export TMPDIR
 

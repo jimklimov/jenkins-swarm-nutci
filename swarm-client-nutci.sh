@@ -2,7 +2,7 @@
 
 # Jenkins Swarm Client integration for NUT CI farm
 # Copyright (C)
-#   2021-2023 by Jim Klimov <jimklimov+nut@gmail.com>
+#   2021-2024 by Jim Klimov <jimklimov+nut@gmail.com>
 # License: MIT
 
 # Launcher for Jenkins swarm agent (can do with shared homedir)
@@ -16,6 +16,7 @@
 #   SCRIPTDIR/../jenkins-`hostname`/
 #   SCRIPTDIR/../jenkins-`hostname`/jenkins-swarm.labels
 #   SCRIPTDIR/../jenkins-`hostname`/jenkins-swarm.yml.envlist (optional, `ENVVAR: "value"` per line)
+#   SCRIPTDIR/../jenkins-`hostname`/jenkins-swarm.yml.extra (optional, appended in the end)
 #   SCRIPTDIR/../jenkins-`hostname`/jenkins-swarm-prestart.include-early (optional, export whatever local envvars needed for this script)
 #   SCRIPTDIR/../jenkins-`hostname`/jenkins-swarm-prestart.include (optional, export whatever local envvars needed just before java launch)
 #   SCRIPTDIR/../jenkins-`hostname`/jenkins-swarm-prestart.sh (optional, do whatever local logic needed)
@@ -92,6 +93,10 @@ if [ -s ./jenkins-swarm.executors ] ; then
 		sed -e 's~\(executors:\)'"${RE_TABSPACE}"'*[0-9]*$~\1 '"${EXECUTORS}"'~' \
 			-i.bak "jenkins-swarm.yml"
 	fi
+fi
+
+if [ -s ./jenkins-swarm.yml.extra ] ; then
+	cat jenkins-swarm.yml.extra >> "jenkins-swarm.yml" || exit
 fi
 
 if [ -s ./jenkins-swarm-prestart.include ] ; then

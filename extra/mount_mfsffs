@@ -48,13 +48,13 @@ MPT="$1"
 
 [ "$SIZE" -gt 0 ] || exit
 case "${MPT}" in
-    /*) ;;
+    /*) [ -d "${MPT}" ] || mkdir -p "${MPT}" ;;
     *) exit ;;
 esac
 
-[ -n "${MFSMPT}" ] && [ x"${MFSMPT}" != xswap ] && [ -d "${MFSMPT}" ] || MFSMPT="`mktemp -d`"
+[ -n "${MFSMPT}" ] && [ x"${MFSMPT}" != xswap ] || MFSMPT="`mktemp -d`"
 case "${MFSMPT}" in
-    /*) ;;
+    /*) [ -d "${MFSMPT}" ] || mkdir -p "${MFSMPT}" ;;
     *) exit ;;
 esac
 

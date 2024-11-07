@@ -26,6 +26,7 @@ mkdir -p "${GITCACHE_DYNAMATRIX_PERSISTENT}"
 mkdir -p "${GITCACHE_DYNAMATRIX_PERSISTENT}@tmp"
 
 [ -n "$TMPDIR" ] && [ -d "$TMPDIR" ] || TMPDIR="${SHMDIR}"
+[ -n "$TMPDIR" ] && [ -d "$TMPDIR" ] || TMPDIR=/var/shm
 [ -n "$TMPDIR" ] && [ -d "$TMPDIR" ] || TMPDIR=/dev/shm
 [ -n "$TMPDIR" ] && [ -d "$TMPDIR" ] || TMPDIR=/tmp
 if [ -d "$TMPDIR" ] ; then

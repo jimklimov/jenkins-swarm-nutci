@@ -6,9 +6,14 @@
 #   rcctl start swarm_client_nutci
 
 # FIXME: Make configurable?
-if [ -d /tmp/shm ] ; then
+if [ -d /var/shm ] ; then
     # Persistent location for the mountpoint
     # was provided by admin or earlier run?
+    SHMDIR=/var/shm
+elif [ -d /tmp/shm ] ; then
+    # Maybe persistent location for the mountpoint
+    # was provided by admin or earlier run?
+    # (if not cleaned during boot)
     SHMDIR=/tmp/shm
 else
     # Linux-style paths for consistency in the CI farm

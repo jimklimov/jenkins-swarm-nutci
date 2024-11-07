@@ -106,7 +106,7 @@ vnconfig "/dev/${VNDDEV}c" "$MFSMPT"/image
 #yes "" | \
     fdisk -yi "/dev/r${VNDDEV}c"
 
-printf 'a\na\n\n\n\nw\nq\n' | sudo disklabel -E "/dev/r${VNDDEV}c"
+printf 'a\na\n\n\n\nw\nq\n' | disklabel -E "/dev/r${VNDDEV}c"
 
 newfs -m 0 -o space "/dev/r${VNDDEV}a"
 

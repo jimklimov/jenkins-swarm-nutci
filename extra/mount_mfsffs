@@ -1,10 +1,12 @@
 #!/bin/sh
 
 # Inspired by https://misc.openbsd.narkive.com/HS72Mz9X/cannot-nfs-mount-an-mfs
-# Scripting (C) 2024 by Jim Klimov
+# Scripting (C) 2024 by Jim Klimov <jimklimov+nut@gmail.com>
 #
-# Mount normal FFS over MFS (RAM disk with swapping support)
-# so it can be shared over NFS from the OpenBSD server.
+# Mount normal FFS over MFS (RAM disk with swapping support), so it
+# can be shared over NFS from the OpenBSD server (MFS can not be).
+# NOTE: Only intended for special cases; overhead is about 2-3%
+# lost on FFS structures in the resulting RAM disk, and compute load.
 # Install into /sbin/mount_mfsffs
 #
 # Can use CLI arg "-u" to only unmount the frankenfs and release the VNDDEV,
@@ -81,7 +83,7 @@ esac
 
 if $UMOUNT_ONLY ; then exit ; fi
 
-mount_mfs -o rw,nodev,nosuid -s "${SIZE}" swap "$MFSMPT"
+mount_mfs -o rw,nodev,nosuid -m 0 -s "${SIZE}" swap "$MFSMPT"
 
 dd if=/dev/zero of="$MFSMPT"/image bs=64k || true
 
@@ -93,7 +95,7 @@ vnconfig "/dev/${VNDDEV}c" "$MFSMPT"/image
 
 printf 'a\na\n\n\n\nw\nq\n' | sudo disklabel -E "/dev/r${VNDDEV}c"
 
-newfs "/dev/r${VNDDEV}a"
+newfs -m 0 -o space "/dev/r${VNDDEV}a"
 
 mount -o "$FFSOPT" "/dev/${VNDDEV}a" "${MPT}"
 

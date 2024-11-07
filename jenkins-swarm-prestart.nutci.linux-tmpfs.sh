@@ -19,6 +19,7 @@ cd "$SCRIPTDIR"
 # NOTE: Some co-located deployments may want a `hostname` suffix etc. here.
 # Can be done via export in their individual `jenkins-swarm-prestart.sh` files.
 [ -n "${GITCACHE_DYNAMATRIX_PERSISTENT}" ] || GITCACHE_DYNAMATRIX_PERSISTENT="${HOME}/.gitcache-dynamatrix"
+[ -n "${WSTMPDIR_NAME}" ] || WSTMPDIR_NAME="jenkins-nutci"
 
 mkdir -p "${HOME}/.ccache"
 mkdir -p "${GITCACHE_DYNAMATRIX_PERSISTENT}"
@@ -28,8 +29,8 @@ mkdir -p "${GITCACHE_DYNAMATRIX_PERSISTENT}@tmp"
 [ -n "$TMPDIR" ] && [ -d "$TMPDIR" ] || TMPDIR=/dev/shm
 [ -n "$TMPDIR" ] && [ -d "$TMPDIR" ] || TMPDIR=/tmp
 if [ -d "$TMPDIR" ] ; then
-    #WSDIR="`mktemp -d "$TMPDIR/jenkins-nutci.XXXXXX"`"
-    WSDIR="$TMPDIR/jenkins-nutci"
+    #WSDIR="`mktemp -d "$TMPDIR/${WSTMPDIR_NAME}.XXXXXX"`"
+    WSDIR="${TMPDIR}/${WSTMPDIR_NAME}"
     mkdir -p "$WSDIR"
     rm -rf workspace
     ln -srf "$WSDIR" ./workspace 2>/dev/null \

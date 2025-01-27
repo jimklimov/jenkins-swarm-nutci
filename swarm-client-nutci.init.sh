@@ -19,6 +19,9 @@
 #
 # May also work for systems with rc.d approach -
 # Symlink as /etc/init.d/rc.swarm_client_nutci and hope it works :)
+# May need to embed into /etc/rc.d/rc.0 and rc.6 (shutdown/reboot)
+# and /etc/rc.d/rc.inet2 (startup), or /etc/rc.local or similar -
+# look around for the approach of the particular OS.
 
 # FIXME: Make configurable?
 SHMDIR=/dev/shm

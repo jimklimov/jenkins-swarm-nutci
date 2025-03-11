@@ -6,5 +6,8 @@
 abuild ALL = (ALL) ALL
 # this one is passwordless:
 abuild ALL = (root) NOPASSWD: /sbin/mount_tmpfs
-abuild ALL = (root) NOPASSWD: /bin/chmod 1777 /tmp/jenkins-swarm
+abuild ALL = (root) NOPASSWD: /bin/chmod 1777 
+# /tmp/jenkins-swarm or TMPDIR from caller/launchd
+# Alternately, for better security, hardcode the dirname in both
+# jenkins-swarm-prestart.nutci.macos-homebrew.sh and chmod params above
 

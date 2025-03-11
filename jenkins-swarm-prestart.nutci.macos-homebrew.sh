@@ -13,4 +13,15 @@
 mkdir -p "$TMPDIR" || exit
 export TMPDIR
 
+# Needs sudoers-abuild-macos set up properly
+if ( [ -x /sbin/mount_tmpfs ] && command -v sudo) >/dev/null 2>/dev/null ; then
+    if [ -n "`/sbin/mount | grep "${TMPDIR}"`" ] ; then : ; else
+        # Can this can be automated in /etc/fstab equivalent?
+        # -e : case-sensitive; -s X : size (RAM)
+        sudo /sbin/mount_tmpfs -s 2G -e -o nodev,noatime,nosuid "${TMPDIR}" \
+        && sudo /bin/chmod 1777 "${TMPDIR}" \
+        || echo "FAILED to prepare tmpfs at $TMPDIR" >&2
+    fi
+fi
+
 . ../jenkins-swarm/jenkins-swarm-prestart.nutci.linux-tmpfs.sh

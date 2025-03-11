@@ -1,0 +1,10 @@
+# To install (as root):
+# cp sudoers-abuild-macos /etc/sudoers.d/
+# chown 600 /etc/sudoers.d/sudoers-abuild-macos
+
+# generally require a password
+abuild ALL = (ALL) ALL
+# this one is passwordless:
+abuild ALL = (root) NOPASSWD: /sbin/mount_tmpfs
+abuild ALL = (root) NOPASSWD: /bin/chmod 1777 /tmp/jenkins-swarm
+

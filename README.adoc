@@ -3,7 +3,7 @@ Jenkins-Swarm (NUT CI)
 
 This is a wrapper project for
 link:https://plugins.jenkins.io/swarm/[Jenkins Swarm]
-build agents that can dial in to a 
+build agents that can dial in to a
 link:https://www.jenkins.io/[Jenkins]
 controller and proclaim their abilities via labels.
 
@@ -29,3 +29,8 @@ For more practical details about the typical agent configuration see:
 
 TODO: Currently the best source of information are the scripts (comments
 and/or code). Some of that belongs in this README, PRs are welcome.
+
+Numerous integration files (init scripts, systemd units, etc.) for different
+platforms are provided. See comments in them about installation into the
+system to start the Jenkins Swarm agent as a service (with automatic update
+of the JAR before each start-up).

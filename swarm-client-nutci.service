@@ -1,9 +1,22 @@
 # Jenkins Swarm Client integration for NUT CI farm
 # Copyright (C)
-#   2021-2022 by Jim Klimov <jimklimov+nut@gmail.com>
+#   2021-2025 by Jim Klimov <jimklimov+nut@gmail.com>
 # License: MIT
 
-# Mind the build account name and homedir (path, layout) below
+# Mind the build account name and homedir (path, layout) below.
+# To install, symlink or copy into the system, e.g.:
+# :; ln -fsr ~abuild/jenkins-swarm/swarm-client-nutci.service /etc/systemd/system/ \
+#    && systemctl daemon-reload \
+#    && systemctl enable swarm-client-nutci.service \
+#    && systemctl restart swarm-client-nutci.service
+# Check how it goes with:
+# :; journalctl -flu swarm-client-nutci.service &
+# Preferably customize via drop-in files, so that your changes
+# do not conflict with a new git checkout or packaged delivery,
+# e.g.:
+# :; mkdir -p /etc/systemd/system/swarm-client-nutci.service.d \
+#    && ( (echo "[Service]" ; echo "Nice=15") \
+#       > /etc/systemd/system/swarm-client-nutci.service.d/nice.conf )
 
 [Unit]
 Wants=network.service networking.service
@@ -14,6 +27,7 @@ Restart=always
 User=abuild
 ExecStartPre=-/home/abuild/jenkins-swarm/swarm-client-download.sh
 ExecStart=/home/abuild/jenkins-swarm/swarm-client-nutci.sh
+#Nice=15
 
 [Install]
 WantedBy=multi-user.target

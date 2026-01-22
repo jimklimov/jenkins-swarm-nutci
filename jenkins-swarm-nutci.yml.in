@@ -8,5 +8,6 @@ mode: exclusive
 labelsFile: jenkins-swarm.labels
 pidFile: jenkins-swarm.pid
 executors: 2
+keepAliveInterval: 60
 environmentVariables:
   PATH+LOCAL: "/usr/lib/ccache"

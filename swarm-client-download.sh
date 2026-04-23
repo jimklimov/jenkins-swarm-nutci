@@ -2,22 +2,37 @@
 
 # Jenkins Swarm Client integration for NUT CI farm
 # Copyright (C)
-#   2021-2023 by Jim Klimov <jimklimov+nut@gmail.com>
+#   2021-2026 by Jim Klimov <jimklimov+nut@gmail.com>
 # License: MIT
 
 # Settings below can be overridden by optional "swarm-client-download.conf":
 # Fetches newest swarm client build, e.g.:
+#LASTVER=1273.v578674cc1b_ca_.jar
+### OLDER:
 #LASTVER=3.25
 #LASTVER=PR493-1
 
 BASEURL="https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/"
 
-getLastVer() {
+getLastVer_Incrementals() {
+	( curl -sL "${BASEURL}" || wget -O - "${BASEURL}" ) \
+	| grep -E '<a href="[0-9]+\.v[0-9a-f_]+/">' \
+	| sed 's,^.*a href="\([0-9][0-9]*\.v[0-9a-f_]*\)/*".*$,\1,' \
+	| grep -vE '^\d\.' \
+	| sort -t. -k1,1n -k2,2n \
+	| tail -1
+}
+
+getLastVer_Old() {
 	( curl -sL "${BASEURL}" || wget -O - "${BASEURL}" ) \
 	| grep -E '<a href="[0-9]+\.[0-9]+/">' \
 	| sed 's,^.*a href="\([0-9][0-9]*\.[0-9][0-9]*\)/*".*$,\1,' \
 	| sort -t. -k1,1n -k2,2n \
 	| tail -1
+}
+
+getLastVer() {
+	getLastVer_Incrementals
 }
 
 SCRIPTDIR="`dirname "$0"`"

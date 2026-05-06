@@ -1,0 +1,23 @@
+# Windows script files should be CR+LF always:
+*.bat text eol=crlf
+
+# Unix/Linux script files should be LF always:
+*.sh text eol=lf
+*.m4 text eol=lf
+*.ac text eol=lf
+*.am text eol=lf
+
+# Docs are assumed text sources with platform-dependent EOL being okay,
+# or we let Git guess otherwise:
+*.adoc text=auto
+*.txt text=auto
+*.md text=auto
+COPYING text=auto
+
+### *.xml(.in)
+### *.yml(.in)
+### *.plist (MACOS)
+
+# The rest are assumed aimed at Unix/Linux platforms,
+# where LF is preferred or required:
+* text eol=lf

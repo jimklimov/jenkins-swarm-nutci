@@ -88,24 +88,41 @@ EOF
     *) die "Unsupported option: '$1'" ;;
 esac
 
-# NOTE: Typically only root may modify CPU affinity and niceness,
-#  especially toward the less restrictive values (when onlining):
-if [ -n "${JRT_USER}" ] && [ x"${JRT_USER}" != x- ] && command -v sudo && command -v taskset ; then
-    # TODO: `ps -ef` is GNU, `taskset` is Linux.
-    # * Expand this to more platforms?
-    # * Detect/configure CPU numbers (cores 0-15 below)
-    #   and the way to post them for a particular tool?
-    JRT_PIDS="$(ps -ef | awk '($1 == "'"${JRT_USER}"'") {print $2}')"
+adjust_runtime_impact_linux() {
+    # NOTE: Typically only root may modify CPU affinity and niceness,
+    #  especially toward the less restrictive values (when onlining):
+    if [ -n "${JRT_USER}" ] && [ x"${JRT_USER}" != x- ] && command -v sudo && command -v taskset ; then
+        # TODO: `ps -ef` is GNU, `taskset` is Linux.
+        # * Expand this to more platforms?
+        # * Detect/configure CPU numbers (cores 0-15 below)
+        #   and the way to post them for a particular tool?
+        JRT_PIDS="$(ps -ef | awk '($1 == "'"${JRT_USER}"'") {print $2}')"
 
-    if [ -n "${JRT_PIDS}" ] ; then
-        for P in $JRT_PIDS ; do
-            case "$ACTION" in
-                on)  sudo taskset -pc 0-15 $P ;;
-                off) sudo taskset -pc 0 $P ;;
-            esac
-        done
+        if [ -n "${JRT_PIDS}" ] ; then
+            for P in $JRT_PIDS ; do
+                case "$ACTION" in
+                    on)  sudo taskset -pc 0-15 $P ;;
+                    off) sudo taskset -pc 0 $P ;;
+                esac
+            done
+        fi
     fi
-fi
+}
+
+adjust_runtime_impact() {
+    # For processes owned by the expected run-time user ($JRT_USER),
+    # reduce (if ACTION=off) or increase (on) the priority and/or
+    # CPU affinity.
+    # Requires OS-specific tools and usually the `sudo` ability or
+    # running as `root` in the first place (especially to let some
+    # process use more resources again).
+    case "`uname -o | tr 'A-Z' 'a-z'`" in
+        *linux*) adjust_runtime_impact_linux ;;
+        *) echo "SKIP: Can not adjust_runtime_impact() on platform '`uname -o` yet" >&2 ;;
+    esac
+}
+
+adjust_runtime_impact
 
 cookie="`mktemp`" && [ -n "$cookie" ] || cookie="/tmp/cookie.$$"
 trap "rm $cookie" 0 1 2 3 15

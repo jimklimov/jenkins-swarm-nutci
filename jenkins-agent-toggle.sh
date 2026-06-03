@@ -53,18 +53,83 @@ if [ -n "$SCRIPTDIR" ] ; then
     D="`cd \"$SCRIPTDIR\" && pwd`" && [ -n "$D" ] && SCRIPTDIR="$D"
 fi
 
-for F in \
-    "${SCRIPTDIR}/jenkins-agent-toggle.conf" \
-    "${HOME}/.jenkins-agent-toggle.conf" \
-    "${HOME}/.config/jenkins-agent-toggle.conf" \
-    die \
-; do
-    [ "$F" = die ] && die "Could not source config from any tried location"
-    if [ -s "$F" ] ; then
-        . "$F" || die "Could not source config from $F"
-        break
-    fi
-done
+getval_JSNyml() {
+    grep -E '^ *'"$1"': ' | sed -e 's,^ *'"$1"': *,,' -e 's/^"\(.*\)"$/\1/' -e 's/^'"'"'\(.*\)'"'"'$/\1/'
+}
+
+read_configs_JSNyml_template() {
+    [ -s "${SCRIPTDIR}/jenkins-swarm-nutci.yml.in" -a -s "${SCRIPTDIR}/jenkins-swarm-nutci.token" ] || return
+
+    FILE="`pwd`/jenkins-swarm-nutci.yml.in"
+
+    RES=0
+    VAL="`getval_JSNyml 'passwordFile' < \"$FILE\"`" && [ -n "$VAL" ] && {
+        if [ -s "$VAL" ] ; then
+            J_PASS="`cat \"$VAL\"`" || RES=1
+        else
+            VAL="`echo \"$VAL\" | sed 's,@SCRIPTDIR@,'\"${SCRIPTDIR}\",`"
+            if [ -s "$VAL" ] ; then
+                J_PASS="`cat \"$VAL\"`" || RES=1
+            else
+                RES=1
+            fi
+        fi
+    }
+    VAL="`getval_JSNyml 'username' < \"$FILE\"`" && [ -n "$VAL" ] && J_USER="$VAL" || RES=1
+    VAL="`getval_JSNyml 'url' < \"$FILE\"`" && [ -n "$VAL" ] && JENKINS_URL="$VAL" || RES=1
+
+    # This one is not likely in the template:
+    VAL="`getval_JSNyml 'name' < \"$FILE\"`" && [ -n "$VAL" ] && REGEX_DN="^$VAL"'$'
+
+    return $RES
+}
+
+read_configs_JSNyml_per_agent() {
+    [ -s "`pwd`/jenkins-swarm-nutci.yml" ] || return
+
+    FILE="`pwd`/jenkins-swarm-nutci.yml"
+
+    RES=0
+    VAL="`getval_JSNyml 'passwordFile' < \"$FILE\"`" && [ -n "$VAL" ] && [ -s "$VAL" ] && J_PASS="`cat \"$VAL\"`" || RES=1
+    VAL="`getval_JSNyml 'username' < \"$FILE\"`" && [ -n "$VAL" ] && J_USER="$VAL" || RES=1
+    VAL="`getval_JSNyml 'url' < \"$FILE\"`" && [ -n "$VAL" ] && JENKINS_URL="$VAL" || RES=1
+    VAL="`getval_JSNyml 'name' < \"$FILE\"`" && [ -n "$VAL" ] && REGEX_DN="^$VAL"'$' || RES=1
+
+    return $RES
+}
+
+read_configs_JATconf() {
+    for F in \
+        "${SCRIPTDIR}/jenkins-agent-toggle.conf" \
+        "${HOME}/.jenkins-agent-toggle.conf" \
+        "${HOME}/.config/jenkins-agent-toggle.conf" \
+        die \
+    ; do
+        [ "$F" = die ] && die "Could not source config from any tried location"
+        if [ -s "$F" ] ; then
+            . "$F" || die "Could not source config from $F"
+            break
+        fi
+    done
+}
+
+do_read_configs() {
+    read_configs_JSNyml_per_agent && return
+    read_configs_JSNyml_template && return
+    read_configs_JATconf
+}
+
+read_configs() {
+    do_read_configs
+
+    case "${JENKINS_URL}${J_USER}${J_PASS}" in
+        *CONFIGURE_THIS*) die "Some critical parameters remain not set" ;;
+    esac
+
+    return 0
+}
+
+read_configs
 
 toggle_off_on() {
     echo "=== `date -u`: Toggling off for now..."

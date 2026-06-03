@@ -79,7 +79,7 @@ read_configs_JSNyml_template() {
     VAL="`getval_JSNyml 'url' < \"$FILE\"`" && [ -n "$VAL" ] && JENKINS_URL="$VAL" || RES=1
 
     # This one is not likely in the template:
-    VAL="`getval_JSNyml 'name' < \"$FILE\"`" && [ -n "$VAL" ] && REGEX_DN="^$VAL"'$'
+    VAL="`getval_JSNyml 'name' < \"$FILE\" | tr '+' '.' | tr '|' '.' | tr '^' '.' | tr '$' '.'`" && [ -n "$VAL" ] && REGEX_DN="^$VAL"'$'
 
     return $RES
 }
@@ -93,7 +93,7 @@ read_configs_JSNyml_per_agent() {
     VAL="`getval_JSNyml 'passwordFile' < \"$FILE\"`" && [ -n "$VAL" ] && [ -s "$VAL" ] && J_PASS="`cat \"$VAL\"`" || RES=1
     VAL="`getval_JSNyml 'username' < \"$FILE\"`" && [ -n "$VAL" ] && J_USER="$VAL" || RES=1
     VAL="`getval_JSNyml 'url' < \"$FILE\"`" && [ -n "$VAL" ] && JENKINS_URL="$VAL" || RES=1
-    VAL="`getval_JSNyml 'name' < \"$FILE\"`" && [ -n "$VAL" ] && REGEX_DN="^$VAL"'$' || RES=1
+    VAL="`getval_JSNyml 'name' < \"$FILE\" | tr '+' '.' | tr '|' '.' | tr '^' '.' | tr '$' '.'`" && [ -n "$VAL" ] && REGEX_DN="^$VAL"'$' || RES=1
 
     return $RES
 }

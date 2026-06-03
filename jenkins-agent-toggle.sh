@@ -143,7 +143,7 @@ toggle_off_on() {
 }
 
 case "$1" in
-    on|off|status) ACTION="$1" ;;
+    on|off|status|stop-graceful) ACTION="$1" ;;
     list) ACTION="$1" ; REGEX_DN='.*' ;;
     off-3h)  toggle_off_on 10800 ;;
     off-10h) toggle_off_on 24000 ;;
@@ -152,6 +152,7 @@ case "$1" in
 $0 (on | off | off-1m [test] | off-3h | off-10h)
 $0 list
 $0 status
+$0 stop-graceful
 EOF
         exit
         ;;
@@ -267,6 +268,17 @@ handle_action() {
         echo "Node Idle State: $NODE_IDLE"
         echo "Node Offline State: $NODE_OFFLINE"
 
+        if [ x"$ACTION" = xstop-graceful ] ; then
+            if [ x"$NODE_OFFLINE" = xfalse ] ; then
+                echo "Toggling node: $NODE_NAME => off"
+                curlcmd_crumb_POST "$JENKINS_URL/computer/$NODE_NAME/toggleOffline"
+            else
+                echo "Node already in desired logical state (off)"
+            fi
+
+            continue
+        fi
+
         if [ x"$ACTION" != xoff ] && [ x"$ACTION" != xon ] ; then
             continue
         fi
@@ -281,6 +293,41 @@ handle_action() {
         echo "Toggling node: $NODE_NAME => $ACTION"
         curlcmd_crumb_POST "$JENKINS_URL/computer/$NODE_NAME/toggleOffline"
     done
+
+    if [ x"$ACTION" = xstop-graceful ] ; then
+        echo "`date -u`: Waiting for nodes to be idle"
+
+        while true ; do
+            if $EXIT_FLAG ; then
+                echo "!!! Break received, aborting loop" >&2
+                return
+            fi
+
+            ALL_OFFLINE=true
+
+            for NODE_NAME in $FILTERED_NODE_LIST ; do
+                echo "=== Waiting for node to be idle: $NODE_NAME"
+
+                NODE_INFO="$(curlcmd_crumb "$JENKINS_URL/computer/$NODE_NAME/api/json")"
+                NODE_IDLE="$(echo "${NODE_INFO}" | jq ".idle")"
+                NODE_OFFLINE="$(echo "${NODE_INFO}" | jq ".offline")"
+                echo "Node Idle State: $NODE_IDLE"
+                echo "Node Offline State: $NODE_OFFLINE"
+
+                if [ x"$NODE_OFFLINE" = xfalse ] || [ x"$NODE_IDLE" = xfalse ] ; then
+                    ALL_OFFLINE=false
+                fi
+            done
+
+            if $ALL_OFFLINE ; then
+                echo "`date -u`: All nodes of interest are offline and idle"
+                return
+            else
+                echo "`date -u`: Some nodes of interest are not yet offline and idle, waiting 10 sec"
+                sleep 10
+            fi
+        done
+    fi
 }
 
 handle_action

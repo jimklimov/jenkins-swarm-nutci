@@ -8,6 +8,8 @@
 # Posted at https://gist.github.com/jimklimov/e8841ff5bbcf6a23a8ece7fe7cb53eb9
 # Inspired by discussion at
 # https://stackoverflow.com/questions/61389821/get-running-build-status-on-a-given-jenkins-worker-node
+#
+# Requires common shell tools, `curl`, `jq`
 
 # Run-time process owner on current system
 # If not empty nor "-", used to modify CPU affinity and process priority
@@ -18,19 +20,19 @@
 
 # Pick out matching "displayName" hits from current list of agents every time we run:
 #REGEX_DN='.*-rpiv'
-REGEX_DN="`hostname`"
+[ -n "${REGEX_DN-}" ] || REGEX_DN="`hostname`"
 
 ##########################################
 # Stuff to configure in the config file
 # (see tried locations below)
 
 # Your Jenkins instance
-JENKINS_URL="https://CONFIGURE_THIS_URL"
+[ -n "${JENKINS_URL-}" ] || JENKINS_URL="https://CONFIGURE_THIS_URL"
 
 # Your user (to run admin commands as)
-J_USER="CONFIGURE_THIS_jadmin"
+[ -n "${J_USER-}" ] || J_USER="CONFIGURE_THIS_jadmin"
 # Generate a User Token from Jenkins account properties, put it here
-J_PASS="CONFIGURE_THIS_123hex"
+[ -n "${J_PASS-}" ] || J_PASS="CONFIGURE_THIS_123hex"
 
 ##########################################
 

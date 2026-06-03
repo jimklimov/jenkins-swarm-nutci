@@ -78,13 +78,15 @@ toggle_off_on() {
 }
 
 case "$1" in
-    on) ACTION=on ;;
-    off) ACTION=off ;;
+    on|off|status) ACTION="$1" ;;
+    list) ACTION="$1" ; REGEX_DN='.*' ;;
     off-3h)  toggle_off_on 10800 ;;
     off-10h) toggle_off_on 24000 ;;
     off-1m|"test")  toggle_off_on 60 ;;
     -h|--help|help) cat << EOF
 $0 (on | off | off-1m [test] | off-3h | off-10h)
+$0 list
+$0 status
 EOF
         exit
         ;;
@@ -171,13 +173,18 @@ get_node_list() {
     [ -n "${RAW_NODE_LIST}" ] || die "Did not get RAW_NODE_LIST"
 
     # TODO: jq? Also query current node state to toggle on/off specifically?
-    FILTERED_NODE_LIST="$(echo "${RAW_NODE_LIST}" | grep -E "\"displayName\"${WSPACE}*:${WSPACE}*\"${REGEX_DN}\"," | awk '{print $NF}' | sed 's/["'"'"',]//g')"
+    FILTERED_NODE_LIST="$(echo "${RAW_NODE_LIST}" | grep -E "\"displayName\"${WSPACE}*:${WSPACE}*\"${REGEX_DN}\"," | awk '{print $NF}' | sed 's/["'"'"',]//g' | grep -Ev '^Nodes*$')"
     echo "=== FILTERED_NODE_LIST: ${FILTERED_NODE_LIST}"
     [ -n "${FILTERED_NODE_LIST}" ] || die "Did not get anything in FILTERED_NODE_LIST"
 }
 
 handle_action() {
     [ -n "${JENKINS_CRUMB}" ] || get_node_list
+
+    if [ x"$ACTION" = xlist ] ; then
+        # Reported for FILTERED_NODE_LIST above
+        return
+    fi
 
     # NOTE: Above we toggle also CPU affinity (TBD: process priorities?)
     for NODE_NAME in $FILTERED_NODE_LIST ; do
@@ -188,6 +195,10 @@ handle_action() {
         NODE_OFFLINE="$(echo "${NODE_INFO}" | jq ".offline")"
         echo "Node Idle State: $NODE_IDLE"
         echo "Node Offline State: $NODE_OFFLINE"
+
+        if [ x"$ACTION" != xoff ] && [ x"$ACTION" != xon ] ; then
+            continue
+        fi
 
         if ( [ x"$NODE_OFFLINE" = xtrue ] && [ x"$ACTION" = xoff ] ) \
         || ( [ x"$NODE_OFFLINE" = xfalse ] && [ x"$ACTION" = xon ] ) \

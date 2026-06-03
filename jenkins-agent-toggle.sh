@@ -62,6 +62,7 @@ for F in \
     [ "$F" = die ] && die "Could not source config from any tried location"
     if [ -s "$F" ] ; then
         . "$F" || die "Could not source config from $F"
+        break
     fi
 done
 

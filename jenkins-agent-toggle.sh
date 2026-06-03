@@ -154,36 +154,51 @@ curlcmd_crumb_POST() {
     curlcmd_crumb -X POST "$@"
 }
 
-echo "Getting Jenkins CSFR Token"
-JENKINS_CRUMB="$(curlcmd "${JENKINS_URL}/crumbIssuer/api/json" | jq -r '.crumb')"
-echo "CSFR Token: $JENKINS_CRUMB"
-[ -n "${JENKINS_CRUMB}" ] || die "Did not get JENKINS_CRUMB"
+JENKINS_CRUMB=""
+get_crumb() {
+    echo "=== Getting Jenkins CSFR Token"
+    JENKINS_CRUMB="$(curlcmd "${JENKINS_URL}/crumbIssuer/api/json" | jq -r '.crumb')"
+    echo "===== CSFR Token: $JENKINS_CRUMB"
+    [ -n "${JENKINS_CRUMB}" ] || die "Did not get JENKINS_CRUMB"
+}
 
-RAW_NODE_LIST="$(curlcmd_crumb "${JENKINS_URL}/computer/api/json?pretty=true")"
-[ -n "${RAW_NODE_LIST}" ] || die "Did not get RAW_NODE_LIST"
+RAW_NODE_LIST=""
+FILTERED_NODE_LIST=""
+get_node_list() {
+    [ -n "${JENKINS_CRUMB}" ] || get_crumb
 
-# TODO: jq? Also query current node state to toggle on/off specifically?
-FILTERED_NODE_LIST="$(echo "${RAW_NODE_LIST}" | grep -E "\"displayName\"${WSPACE}*:${WSPACE}*\"${REGEX_DN}\"," | awk '{print $NF}' | sed 's/["'"'"',]//g')"
-echo "FILTERED_NODE_LIST: ${FILTERED_NODE_LIST}"
-[ -n "${FILTERED_NODE_LIST}" ] || die "Did not get anything in FILTERED_NODE_LIST"
+    RAW_NODE_LIST="$(curlcmd_crumb "${JENKINS_URL}/computer/api/json?pretty=true")"
+    [ -n "${RAW_NODE_LIST}" ] || die "Did not get RAW_NODE_LIST"
 
-# NOTE: Above we toggle also CPU affinity (TBD: process priorities?)
-for NODE_NAME in $FILTERED_NODE_LIST ; do
-    echo "=== Researching node: $NODE_NAME"
+    # TODO: jq? Also query current node state to toggle on/off specifically?
+    FILTERED_NODE_LIST="$(echo "${RAW_NODE_LIST}" | grep -E "\"displayName\"${WSPACE}*:${WSPACE}*\"${REGEX_DN}\"," | awk '{print $NF}' | sed 's/["'"'"',]//g')"
+    echo "=== FILTERED_NODE_LIST: ${FILTERED_NODE_LIST}"
+    [ -n "${FILTERED_NODE_LIST}" ] || die "Did not get anything in FILTERED_NODE_LIST"
+}
 
-    NODE_INFO="$(curlcmd_crumb "$JENKINS_URL/computer/$NODE_NAME/api/json")"
-    NODE_IDLE="$(echo "${NODE_INFO}" | jq ".idle")"
-    NODE_OFFLINE="$(echo "${NODE_INFO}" | jq ".offline")"
-    echo "Node Idle State: $NODE_IDLE"
-    echo "Node Offline State: $NODE_OFFLINE"
+handle_action() {
+    [ -n "${JENKINS_CRUMB}" ] || get_node_list
 
-    if ( [ x"$NODE_OFFLINE" = xtrue ] && [ x"$ACTION" = xoff ] ) \
-    || ( [ x"$NODE_OFFLINE" = xfalse ] && [ x"$ACTION" = xon ] ) \
-    ; then
-        echo "Node already in desired logical state ($ACTION)"
-        continue
-    fi
+    # NOTE: Above we toggle also CPU affinity (TBD: process priorities?)
+    for NODE_NAME in $FILTERED_NODE_LIST ; do
+        echo "=== Researching node: $NODE_NAME"
 
-    echo "Toggling node: $NODE_NAME => $ACTION"
-    curlcmd_crumb_POST "$JENKINS_URL/computer/$NODE_NAME/toggleOffline"
-done
+        NODE_INFO="$(curlcmd_crumb "$JENKINS_URL/computer/$NODE_NAME/api/json")"
+        NODE_IDLE="$(echo "${NODE_INFO}" | jq ".idle")"
+        NODE_OFFLINE="$(echo "${NODE_INFO}" | jq ".offline")"
+        echo "Node Idle State: $NODE_IDLE"
+        echo "Node Offline State: $NODE_OFFLINE"
+
+        if ( [ x"$NODE_OFFLINE" = xtrue ] && [ x"$ACTION" = xoff ] ) \
+        || ( [ x"$NODE_OFFLINE" = xfalse ] && [ x"$ACTION" = xon ] ) \
+        ; then
+            echo "Node already in desired logical state ($ACTION)"
+            continue
+        fi
+
+        echo "Toggling node: $NODE_NAME => $ACTION"
+        curlcmd_crumb_POST "$JENKINS_URL/computer/$NODE_NAME/toggleOffline"
+    done
+}
+
+handle_action

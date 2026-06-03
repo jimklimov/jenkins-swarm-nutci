@@ -198,8 +198,9 @@ adjust_runtime_impact() {
 
 adjust_runtime_impact
 
+EXIT_FLAG=false
 cookie="`mktemp`" && [ -n "$cookie" ] || cookie="/tmp/cookie.$$"
-trap "rm $cookie" 0 1 2 3 15
+trap "rm $cookie ; EXIT_FLAG=true" 0 1 2 3 15
 
 do_curlcmd() {
     curl -s -c "$cookie" -u "${J_USER}:${J_PASS}" "$@"
@@ -253,6 +254,11 @@ handle_action() {
 
     # NOTE: Above we toggle also CPU affinity (TBD: process priorities?)
     for NODE_NAME in $FILTERED_NODE_LIST ; do
+        if $EXIT_FLAG ; then
+            echo "!!! Break received, aborting loop" >&2
+            return
+        fi
+
         echo "=== Researching node: $NODE_NAME"
 
         NODE_INFO="$(curlcmd_crumb "$JENKINS_URL/computer/$NODE_NAME/api/json")"

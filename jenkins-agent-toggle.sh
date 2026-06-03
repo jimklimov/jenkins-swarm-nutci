@@ -119,6 +119,10 @@ adjust_runtime_impact() {
     # Requires OS-specific tools and usually the `sudo` ability or
     # running as `root` in the first place (especially to let some
     # process use more resources again).
+    if [ x"${JRT_USER-}" = x ] || [ x"${ACTION-}" != xon -a x"${ACTION-}" != xoff ]; then
+        return 0
+    fi
+
     case "`uname -o | tr 'A-Z' 'a-z'`" in
         *linux*) adjust_runtime_impact_linux ;;
         *) echo "SKIP: Can not adjust_runtime_impact() on platform '`uname -o` yet" >&2 ;;

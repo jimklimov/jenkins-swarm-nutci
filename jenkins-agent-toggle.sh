@@ -367,6 +367,11 @@ handle_action() {
                 echo "Node Idle State: $NODE_IDLE"
                 echo "Node Offline State: $NODE_OFFLINE"
 
+                if [ x"$NODE_OFFLINE" = xfalse ] ; then
+                    echo "Toggling node: $NODE_NAME => off (again)"
+                    curlcmd_crumb_POST "$JENKINS_URL/computer/$NODE_NAME/toggleOffline"
+                fi
+
                 if [ x"$NODE_OFFLINE" = xfalse ] || [ x"$NODE_IDLE" = xfalse ] ; then
                     ALL_OFFLINE=false
                 fi

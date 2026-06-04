@@ -11,10 +11,10 @@
 
 set -e
 
-SCRIPTDIR="`dirname "$0"`"
-SCRIPTDIR="`cd "$SCRIPTDIR" && pwd`"
+SCRIPTDIR="`dirname \"$0\"`"
+SCRIPTDIR="`cd \"${SCRIPTDIR}\" && pwd`"
 
-cd "$SCRIPTDIR"
+cd "${SCRIPTDIR}"
 
 # NOTE: Some co-located deployments may want a `hostname` suffix etc. here.
 # Can be done via export in their individual `jenkins-swarm-prestart.sh` files.

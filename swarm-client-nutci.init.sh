@@ -31,7 +31,7 @@ SHMDIR=/dev/shm
 #set -x
 
 # These lines run as root, regardless of daemon_user
-if [ -n "`/sbin/mount | grep "${SHMDIR}"`" ] ; then : ; else
+if [ -n "`/sbin/mount | grep \"${SHMDIR}\"`" ] ; then : ; else
     # This can be automated in /etc/fstab with such line, e.g.:
     #   swap /dev/shm mfs rw,nodev,nosuid,-s=1536000 0 0
     mkdir "${SHMDIR}"
@@ -41,16 +41,16 @@ if [ -d "${SHMDIR}" ]; then chmod 1777 "${SHMDIR}" ; fi
 
 daemon_user="abuild"
 touch /var/log/swarm-client-nutci
-chown ${daemon_user} /var/log/swarm-client-nutci
+chown "${daemon_user}" /var/log/swarm-client-nutci
 
 # allow larger resource limits (consider even "daemon" for unlimited?)
 # see /etc/login.conf for standard definitions
-#usermod -L pbuild ${daemon_user}
+#usermod -L pbuild "${daemon_user}"
 
 downloader="/home/abuild/jenkins-swarm/swarm-client-download.sh >> /var/log/swarm-client-nutci 2>&1"
 daemon="/home/abuild/jenkins-swarm/swarm-client-nutci.sh"
-#daemon="cd "${SHMDIR}" && nohup /home/abuild/jenkins-swarm/swarm-client-nutci.sh >> /var/log/swarm-client-nutci 2>&1 &"
-#daemon="/bin/sh -c \\' cd "${SHMDIR}" && nohup /home/abuild/jenkins-swarm/swarm-client-nutci.sh >> /var/log/swarm-client-nutci 2>&1 \\' &"
+#daemon="cd \"${SHMDIR}\" && nohup /home/abuild/jenkins-swarm/swarm-client-nutci.sh >> /var/log/swarm-client-nutci 2>&1 &"
+#daemon="/bin/sh -c \\' cd \"${SHMDIR}\" && nohup /home/abuild/jenkins-swarm/swarm-client-nutci.sh >> /var/log/swarm-client-nutci 2>&1 \\' &"
 
 # Allow to restart the service on command line (or via rcctl)
 #INRC=1
@@ -61,20 +61,20 @@ rc_start() {
 #	exec >> /var/log/swarm_client_nutci.rcctl.log 2>&1
 #	set -x
 #	set -v
-	PATH="$PATH:/usr/local/sbin:/usr/local/bin" ${downloader}
+	PATH="${PATH}:/usr/local/sbin:/usr/local/bin" ${downloader}
 	#cd "${SHMDIR}" || exit
 
 	# Leading single-token no-op due to shell inlining peculiarities generally
-	cd "${SHMDIR}" && nohup su - ${daemon_user} -c ' true; ulimit -a >&2; /home/abuild/jenkins-swarm/swarm-client-nutci.sh' >> /var/log/swarm-client-nutci 2>&1 &
+	cd "${SHMDIR}" && nohup su - "${daemon_user}" -c ' true; ulimit -a >&2; /home/abuild/jenkins-swarm/swarm-client-nutci.sh' >> /var/log/swarm-client-nutci 2>&1 &
 }
 
 rc_stop() {
 	echo "`date`: Stopping $0" >> /var/log/swarm-client-nutci
-	kill -15 `ps -xawwu | grep java | grep swarm-client | grep ${daemon_user} | awk '{print $2}'`
+	kill -15 `ps -xawwu | grep java | grep swarm-client | grep "${daemon_user}" | awk '{print $2}'`
 }
 
 rc_check() {
-	ps -xawwu | grep java | grep swarm-client | grep ${daemon_user} | awk '{print $2}'
+	ps -xawwu | grep java | grep swarm-client | grep "${daemon_user}" | awk '{print $2}'
 }
 
 #set -x

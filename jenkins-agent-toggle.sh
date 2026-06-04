@@ -49,8 +49,8 @@ die() {
 }
 
 SCRIPTDIR="`dirname "$0"`"
-if [ -n "$SCRIPTDIR" ] ; then
-    D="`cd \"$SCRIPTDIR\" && pwd`" && [ -n "$D" ] && SCRIPTDIR="$D"
+if [ -n "${SCRIPTDIR}" ] ; then
+    D="`cd \"${SCRIPTDIR}\" && pwd`" && [ -n "$D" ] && SCRIPTDIR="$D"
 fi
 
 getval_JSNyml() {

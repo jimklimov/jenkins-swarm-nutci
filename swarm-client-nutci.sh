@@ -2,7 +2,7 @@
 
 # Jenkins Swarm Client integration for NUT CI farm
 # Copyright (C)
-#   2021-2024 by Jim Klimov <jimklimov+nut@gmail.com>
+#   2021-2026 by Jim Klimov <jimklimov+nut@gmail.com>
 # License: MIT
 
 # Launcher for Jenkins swarm agent (can do with shared homedir)
@@ -29,14 +29,16 @@
 #     systemctl enable swarm-client-nutci.service
 #     systemctl start swarm-client-nutci.service
 
-SCRIPTDIR="`dirname "$0"`"
-SCRIPTDIR="`cd "$SCRIPTDIR" && pwd`"
+SCRIPTDIR="`dirname \"$0\"`"
+SCRIPTDIR="`cd \"${SCRIPTDIR}\" && pwd`"
 
 # NOTE: At this point we may not know the AGENT_NAME from a config file
 # but may have it from service unit configuration etc. Normally we get
 # (or reset) it with jenkins-swarm-prestart.include-early file.
 [ -n "${AGENT_NAME-}" ] || AGENT_NAME="`hostname | sed 's,\..*$,,'`"
-cd "$SCRIPTDIR/../jenkins-${AGENT_NAME}/" || exit
+[ -n "${AGENT_DIR-}" ] || AGENT_DIR="${SCRIPTDIR}/../jenkins-${AGENT_NAME}/"
+
+cd "${AGENT_DIR}" || exit
 
 if [ -s ./jenkins-swarm-prestart.include-early ] ; then
 	# e.g. source some custom AGENT_NAME, custom PATH to GNU toolkit, etc.
@@ -64,7 +66,7 @@ sed \
 	-e 's,[@]SCRIPTDIR[@],'"${SCRIPTDIR}"',g' \
 	-e 's,[@]HOMEDIR[@],'"${HOME}"',g' \
 	-e 's,[@]HOME[@],'"${HOME}"',g' \
-	< "$SCRIPTDIR/jenkins-swarm-nutci.yml.in" > "jenkins-swarm.yml"
+	< "${SCRIPTDIR}/jenkins-swarm-nutci.yml.in" > "jenkins-swarm.yml"
 
 cat >> "jenkins-swarm.yml" << EOF
 name: "${AGENT_NAME-}"
@@ -77,7 +79,7 @@ if [ -s ./jenkins-swarm.yml.envlist ] ; then
 	|| { echo "environmentVariables:" >> "jenkins-swarm.yml"; }
 
 	# Indent with two spaces in a way that works on non-GNU userlands
-	ENVLIST="`sed -e 's,^'"${RE_TABSPACE}"'*\(.*\)'"${RE_TABSPACE}"'*$,  \1,' -e 's,\",\\\\\\\\\",g' < ./jenkins-swarm.yml.envlist | grep -vE '^  $' | while IFS='' read LINE ; do printf '%sn%s' '\' "$LINE" ; done`"
+	ENVLIST="`sed -e 's,^'\"${RE_TABSPACE}\"'*\(.*\)'\"${RE_TABSPACE}\"'*$,  \1,' -e 's,\\\",\\\\\\\\\",g' < ./jenkins-swarm.yml.envlist | grep -vE '^  $' | while IFS='' read LINE ; do printf '%sn%s' '\' "$LINE" ; done`"
 	#printf 'ENVLIST: %s\n' "$ENVLIST"
 	awk '{ if (/^environmentVariables:'"${RE_TABSPACE}"'*$/) {print $0"'"${ENVLIST}"'";} else { print $0 } }' \
 	< "jenkins-swarm.yml" > "jenkins-swarm.yml.tmp" \
@@ -89,7 +91,7 @@ if [ -s ./jenkins-swarm.executors ] ; then
 	grep "executors:" "jenkins-swarm.yml" > /dev/null \
 	|| { echo "executors: 1" >> "jenkins-swarm.yml"; }
 
-	EXECUTORS="`head -1 "./jenkins-swarm.executors"`"
+	EXECUTORS="`head -1 \"./jenkins-swarm.executors\"`"
 	if [ "$EXECUTORS" -gt 0 ]; then
 		sed -e 's~\(executors:\)'"${RE_TABSPACE}"'*[0-9]*$~\1 '"${EXECUTORS}"'~' \
 			-i.bak "jenkins-swarm.yml"
@@ -125,9 +127,9 @@ cat "jenkins-swarm.labels" || true
 # Note: This may be not the "LASTVER" downloaded by swarm-client-download.sh
 # e.g. if you "game the system" temporarily to try custom builds named like
 #   swarm-client-99999-growingNumbers.jar
-[ -n "${PREFERJAR-}" ] || PREFERJAR="`ls -1 "$SCRIPTDIR"/swarm-client-*.jar | sort -n | tail -1`"
+[ -n "${PREFERJAR-}" ] || PREFERJAR="`ls -1 \"${SCRIPTDIR}\"/swarm-client-*.jar | sort -n | tail -1`"
 
-echo "=== Launching Java for $PREFERJAR:"
+echo "=== Launching Java for ${PREFERJAR}:"
 set -x
-exec java -jar "$PREFERJAR" \
+exec java -jar "${PREFERJAR}" \
 	-config "jenkins-swarm.yml"

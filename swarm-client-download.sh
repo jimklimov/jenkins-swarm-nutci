@@ -35,9 +35,9 @@ getLastVer() {
 	getLastVer_Incrementals
 }
 
-SCRIPTDIR="`dirname "$0"`"
-SCRIPTDIR="`cd "$SCRIPTDIR" && pwd`"
-cd "$SCRIPTDIR"
+SCRIPTDIR="`dirname \"$0\"`"
+SCRIPTDIR="`cd \"${SCRIPTDIR}\" && pwd`"
+cd "${SCRIPTDIR}"
 
 if [ -s "./swarm-client-download.conf" ]; then
 	ls -la "`pwd`/swarm-client-download.conf"

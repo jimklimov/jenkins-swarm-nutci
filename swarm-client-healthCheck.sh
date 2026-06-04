@@ -2,20 +2,20 @@
 
 # Check what Jenkins controller thinks about this agent - is it known? online?
 
-SCRIPTDIR="`dirname "$0"`"
-SCRIPTDIR="`cd "$SCRIPTDIR" && pwd`"
+SCRIPTDIR="`dirname \"$0\"`"
+SCRIPTDIR="`cd \"${SCRIPTDIR}\" && pwd`"
 
-cd "$SCRIPTDIR/../jenkins-`hostname`/" || exit
+cd "${SCRIPTDIR}/../jenkins-`hostname`/" || exit
 
 ( command -v curl || command -v wget ) >/dev/null 2>&1 || exit
 
-JENKINS_URL="`grep -E '^url:' jenkins-swarm.yml | awk '{print $NF}' | sed -e 's,^"\(.*\)"$,\1,' -e 's,/*$,,'`"
-NODENAME="`grep -E '^name:' jenkins-swarm.yml | awk '{print $NF}' | sed 's,^"\(.*\)"$,\1,'`"
+JENKINS_URL="`grep -E '^url:' jenkins-swarm.yml | awk '{print $NF}' | sed -e 's,^\"\(.*\)\"$,\1,' -e 's,/*$,,'`"
+NODENAME="`grep -E '^name:' jenkins-swarm.yml | awk '{print $NF}' | sed 's,^\"\(.*\)\"$,\1,'`"
 
-TEMP="`mktemp -p "${TMPDIR:-/tmp}" -d swarm-client-healthCheck.XXXXXX`" || exit
+TEMP="`mktemp -p \"${TMPDIR:-/tmp}\" -d swarm-client-healthCheck.XXXXXX`" || exit
 trap 'rm -rf "$TEMP"' 0 1 2 3 15
 
-API_URL="$JENKINS_URL/computer/$NODENAME/api/json"
+API_URL="${JENKINS_URL}/computer/${NODENAME}/api/json"
 if command -v curl >/dev/null 2>&1 ; then
     curl -vkL "$API_URL"
 else

@@ -35,16 +35,16 @@ if [ -d "${SHMDIR}" ]; then chmod 1777 "${SHMDIR}" ; fi
 
 daemon_user="abuild"
 touch /var/log/swarm-client-nutci
-chown ${daemon_user} /var/log/swarm-client-nutci
+chown "${daemon_user}" /var/log/swarm-client-nutci
 
 # allow larger resource limits (consider even "daemon" for unlimited?)
 # see /etc/login.conf for standard definitions
-usermod -L pbuild ${daemon_user}
+usermod -L pbuild "${daemon_user}"
 
 downloader="/home/abuild/jenkins-swarm/swarm-client-download.sh >> /var/log/swarm-client-nutci 2>&1"
 daemon="/home/abuild/jenkins-swarm/swarm-client-nutci.sh"
-#daemon="cd "${SHMDIR}" && nohup /home/abuild/jenkins-swarm/swarm-client-nutci.sh >> /var/log/swarm-client-nutci 2>&1 &"
-#daemon="/bin/sh -c \\' cd "${SHMDIR}" && nohup /home/abuild/jenkins-swarm/swarm-client-nutci.sh >> /var/log/swarm-client-nutci 2>&1 \\' &"
+#daemon="cd \"${SHMDIR}\" && nohup /home/abuild/jenkins-swarm/swarm-client-nutci.sh >> /var/log/swarm-client-nutci 2>&1 &"
+#daemon="/bin/sh -c \\' cd \"${SHMDIR}\" && nohup /home/abuild/jenkins-swarm/swarm-client-nutci.sh >> /var/log/swarm-client-nutci 2>&1 \\' &"
 
 # Allow to restart the service on command line (or via rcctl)
 INRC=1
@@ -61,7 +61,7 @@ rc_pre() {
 
 rc_start() {
 	# Leading single-token no-op due to shell inlining peculiarities generally
-	cd "${SHMDIR}" && nohup su - ${daemon_user} -cx ' true; ulimit -a >&2; /home/abuild/jenkins-swarm/swarm-client-nutci.sh' >> /var/log/swarm-client-nutci 2>&1 &
+	cd "${SHMDIR}" && nohup su - "${daemon_user}" -cx ' true; ulimit -a >&2; /home/abuild/jenkins-swarm/swarm-client-nutci.sh' >> /var/log/swarm-client-nutci 2>&1 &
 	sleep 2
 	rc_check
 }

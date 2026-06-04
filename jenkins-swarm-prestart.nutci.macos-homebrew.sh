@@ -18,12 +18,12 @@ export TMPDIR
 # and just hard-code e.g. /tmp/jenkins-swarm here and in sudoers
 # (for better security)
 if ( [ -x /sbin/mount_tmpfs ] && command -v sudo) >/dev/null 2>/dev/null ; then
-    if [ -n "`/sbin/mount | grep "${TMPDIR}"`" ] ; then : ; else
+    if [ -n "`/sbin/mount | grep \"${TMPDIR}\"`" ] ; then : ; else
         # Can this can be automated in /etc/fstab equivalent?
         # -e : case-sensitive; -s X : size (RAM)
         sudo /sbin/mount_tmpfs -s 2G -e -o nodev,noatime,nosuid "${TMPDIR}" \
         && sudo /bin/chmod 1777 "${TMPDIR}" \
-        || echo "FAILED to prepare tmpfs at $TMPDIR" >&2
+        || echo "FAILED to prepare tmpfs at ${TMPDIR}" >&2
     fi
 fi
 

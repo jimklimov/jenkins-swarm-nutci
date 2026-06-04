@@ -256,11 +256,13 @@ get_node_list() {
     # This should have all detailed info about all nodes,
     # at least those visible to this account
     RAW_NODE_LIST="$(curlcmd_crumb "${JENKINS_URL}/computer/api/json?pretty=true")"
+    #echo "${RAW_NODE_LIST}" > /tmp/raw-node-list
     [ -n "${RAW_NODE_LIST}" ] || die "Did not get RAW_NODE_LIST"
 
     # TODO: jq? Also query current node state to toggle on/off specifically?
     FILTERED_NODE_LIST="$(echo "${RAW_NODE_LIST}" | grep -E "\"displayName\"${WSPACE}*:${WSPACE}*\"${REGEX_DN}\"," | awk '{print $NF}' | sed 's/["'"'"',]//g' | grep -Ev '^Nodes*$')"
-    echo "=== FILTERED_NODE_LIST: ${FILTERED_NODE_LIST}"
+    echo "=== FILTERED_NODE_LIST with regex '${REGEX_DN}':"
+    echo "${FILTERED_NODE_LIST}"
     [ -n "${FILTERED_NODE_LIST}" ] || die "Did not get anything in FILTERED_NODE_LIST"
 }
 

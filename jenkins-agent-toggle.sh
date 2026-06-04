@@ -60,7 +60,7 @@ getval_JSNyml() {
 read_configs_JSNyml_template() {
     [ -s "${SCRIPTDIR}/jenkins-swarm-nutci.yml.in" -a -s "${SCRIPTDIR}/jenkins-swarm-nutci.token" ] || return
 
-    FILE="`pwd`/jenkins-swarm-nutci.yml.in"
+    FILE="${SCRIPTDIR}/jenkins-swarm-nutci.yml.in"
 
     RES=0
     VAL="`getval_JSNyml 'passwordFile' < \"$FILE\"`" && [ -n "$VAL" ] && {
@@ -90,9 +90,12 @@ read_configs_JSNyml_template() {
 }
 
 read_configs_JSNyml_per_agent() {
-    [ -s "`pwd`/jenkins-swarm-nutci.yml" ] || return
-
-    FILE="`pwd`/jenkins-swarm-nutci.yml"
+    [ -s "`pwd`/jenkins-swarm-nutci.yml" ] && FILE="`pwd`/jenkins-swarm-nutci.yml" \
+    || {
+        [ -s "${SCRIPTDIR}/../jenkins-`hostname`/jenkins-swarm-nutci.yml" ] \
+        && FILE="${SCRIPTDIR}/../jenkins-`hostname`/jenkins-swarm-nutci.yml" \
+        || return
+    }
 
     RES=0
     VAL="`getval_JSNyml 'passwordFile' < \"$FILE\"`" && [ -n "$VAL" ] && [ -s "$VAL" ] && J_PASS="`cat \"$VAL\"`" || RES=1

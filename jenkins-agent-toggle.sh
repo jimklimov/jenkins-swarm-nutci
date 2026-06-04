@@ -166,7 +166,7 @@ $0 status-all
 $0 stop-graceful
     Initiate administrative offlining and wait for REGEX_DN agent(s) to be
     idle; only then exit this script (agent JAR remains connected - kill it
-    separately).
+    separately, see swarm-client-nutci-stop.sh for example).
 EOF
         exit
         ;;

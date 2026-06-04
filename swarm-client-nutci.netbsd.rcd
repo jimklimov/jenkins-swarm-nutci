@@ -80,7 +80,11 @@ rc_start() {
 
 rc_stop() {
 	echo "`date`: Stopping $0" >> /var/log/swarm-client-nutci
-	kill -15 `ps -xawwu | grep java | grep swarm-client | grep "${daemon_user}" | awk '{print $2}'`
+#	kill -15 `ps -xawwu | grep java | grep swarm-client | grep "${daemon_user}" | awk '{print $2}'`
+
+	export daemon_user
+	/home/abuild/jenkins-swarm/swarm-client-nutci-stop.sh stop 2>&1 | tee -a /var/log/swarm-client-nutci
+
 	while test -n "`rc_check`" ; do sleep 2 ; done
 	return 0
 }

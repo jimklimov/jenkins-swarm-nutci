@@ -39,3 +39,6 @@ The `jenkins-agent-toggle.sh` (with its own configuration to access the
 Jenkins controller) can be used to automate processes around agent life
 cycle (e.g. to offline the agent logically and wait for actual builds to
 complete before disconnecting it, when we want to shut down gracefully).
+
+This is further wrapped by `swarm-client-nutci-stop.sh` to coordinate
+finishing the jobs and killing the agent process gracefully.

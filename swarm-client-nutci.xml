@@ -7,7 +7,7 @@
  -->
 <!DOCTYPE service_bundle SYSTEM '/usr/share/lib/xml/dtd/service_bundle.dtd.1'>
 <service_bundle type='manifest' name='export'>
-  <service name='application/jenkins/swarm-client' type='service' version='0'>
+  <service name='application/jenkins/swarm-client' type='service' version='1'>
     <dependency name='fs-local' grouping='require_all' restart_on='none' type='service'>
       <service_fmri value='svc:/system/filesystem/local'/>
     </dependency>
@@ -28,8 +28,12 @@
     <exec_method
         type='method'
         name='stop'
-        exec=':kill'
-        timeout_seconds='60' />
+        exec='/home/abuild/jenkins-swarm/swarm-client-nutci-stop.sh stop'
+        timeout_seconds='86400'>
+        <method_context>
+            <method_credential user='abuild' group='abuild' />
+        </method_context>
+    </exec_method>
 
     <property_group name='startd' type='framework'>
         <propval name='ignore_error' type='astring'

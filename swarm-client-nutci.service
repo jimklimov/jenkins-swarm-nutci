@@ -27,6 +27,7 @@ Restart=always
 User=abuild
 ExecStartPre=-/home/abuild/jenkins-swarm/swarm-client-download.sh
 ExecStart=/home/abuild/jenkins-swarm/swarm-client-nutci.sh
+ExecStop=/home/abuild/jenkins-swarm/swarm-client-nutci-stop.sh stop
 #Nice=15
 
 [Install]

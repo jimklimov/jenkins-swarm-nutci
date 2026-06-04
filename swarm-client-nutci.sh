@@ -6,6 +6,9 @@
 # License: MIT
 
 # Launcher for Jenkins swarm agent (can do with shared homedir)
+# NOTE: To stop the agents, see swarm-client-nutci-stop.sh
+#   to wait gracefully or `kill` their processes ungracefully
+#   (aborting any running job parts).
 # Expected structure:
 #   SCRIPTDIR/swarm-client-nutci.sh
 #   SCRIPTDIR/swarm-client-X.YZ.jar

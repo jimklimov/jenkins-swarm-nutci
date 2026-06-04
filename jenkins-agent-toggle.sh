@@ -11,6 +11,11 @@
 #
 # Requires common shell tools, `curl`, `jq`
 
+# May be specified by caller, prefer that
+# Use internal-scoped variable when we need to guess though
+_AGENT_NAME="${AGENT_NAME}"
+[ -n "${_AGENT_NAME-}" ] || _AGENT_NAME="`hostname | sed 's,\..*$,,'`"
+
 # Run-time process owner on current system
 # If not empty nor "-", used to modify CPU affinity and process priority
 # for already running processes owned by that user (e.g. free up the
@@ -20,7 +25,7 @@
 
 # Pick out matching "displayName" hits from current list of agents every time we run:
 #REGEX_DN='.*-rpiv'
-[ -n "${REGEX_DN-}" ] || REGEX_DN="`hostname`"
+[ -n "${REGEX_DN-}" ] || REGEX_DN="^${_AGENT_NAME}"
 
 ##########################################
 # Stuff to configure in the config file
@@ -92,8 +97,8 @@ read_configs_JSNyml_template() {
 read_configs_JSNyml_per_agent() {
     [ -s "`pwd`/jenkins-swarm-nutci.yml" ] && FILE="`pwd`/jenkins-swarm-nutci.yml" \
     || {
-        [ -s "${SCRIPTDIR}/../jenkins-`hostname`/jenkins-swarm-nutci.yml" ] \
-        && FILE="${SCRIPTDIR}/../jenkins-`hostname`/jenkins-swarm-nutci.yml" \
+        [ -s "${SCRIPTDIR}/../jenkins-${_AGENT_NAME}/jenkins-swarm-nutci.yml" ] \
+        && FILE="${SCRIPTDIR}/../jenkins-${_AGENT_NAME}/jenkins-swarm-nutci.yml" \
         || return
     }
 
@@ -260,7 +265,7 @@ get_node_list() {
     [ -n "${RAW_NODE_LIST}" ] || die "Did not get RAW_NODE_LIST"
 
     # TODO: jq? Also query current node state to toggle on/off specifically?
-    FILTERED_NODE_LIST="$(echo "${RAW_NODE_LIST}" | grep -E "\"displayName\"${WSPACE}*:${WSPACE}*\"${REGEX_DN}\"," | awk '{print $NF}' | sed 's/["'"'"',]//g' | grep -Ev '^Nodes*$')"
+    FILTERED_NODE_LIST="$(echo "${RAW_NODE_LIST}" | grep -E "\"displayName\"${WSPACE}*:${WSPACE}*\"[^ ]*\"," | awk '{print $NF}' | sed 's/["'"'"',]//g' | grep -Ev '^Nodes*$' | grep -E "${REGEX_DN}")"
     echo "=== FILTERED_NODE_LIST with regex '${REGEX_DN}':"
     echo "${FILTERED_NODE_LIST}"
     [ -n "${FILTERED_NODE_LIST}" ] || die "Did not get anything in FILTERED_NODE_LIST"

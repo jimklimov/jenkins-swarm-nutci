@@ -1,3 +1,8 @@
+# Jenkins Swarm Client integration for NUT CI farm
+# Copyright (C)
+#   2021-2026 by Jim Klimov <jimklimov+nut@gmail.com>
+# License: MIT
+
 # Export paths to platform-dependent HomeBrew location on MacOS
 # (if not yet done by shell profile, earlier calls to this file, etc.)
 

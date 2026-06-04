@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Jenkins Swarm Client integration for NUT CI farm
+# Copyright (C)
+#   2021-2026 by Jim Klimov <jimklimov+nut@gmail.com>
+# License: MIT
+
 # Check what Jenkins controller thinks about this agent - is it known? online?
 
 SCRIPTDIR="`dirname \"$0\"`"

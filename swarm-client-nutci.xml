@@ -1,4 +1,10 @@
 <?xml version='1.0'?>
+<!--
+  Jenkins Swarm Client integration for NUT CI farm
+  Copyright (C)
+    2021-2026 by Jim Klimov <jimklimov+nut@gmail.com>
+  License: MIT
+ -->
 <!DOCTYPE service_bundle SYSTEM '/usr/share/lib/xml/dtd/service_bundle.dtd.1'>
 <service_bundle type='manifest' name='export'>
   <service name='application/jenkins/swarm-client' type='service' version='0'>

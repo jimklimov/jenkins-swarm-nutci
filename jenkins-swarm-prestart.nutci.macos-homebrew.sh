@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# Jenkins Swarm Client integration for NUT CI farm
+# Copyright (C)
+#   2021-2026 by Jim Klimov <jimklimov+nut@gmail.com>
+# License: MIT
+
 . ../jenkins-swarm/jenkins-swarm-prestart.nutci.macos-homebrew.include
 
 #sed -e 's,^pidFile:.*$,,' -i.bak jenkins-swarm.yml

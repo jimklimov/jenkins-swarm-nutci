@@ -1,3 +1,8 @@
+# Jenkins Swarm Client integration for NUT CI farm
+# Copyright (C)
+#   2021-2026 by Jim Klimov <jimklimov+nut@gmail.com>
+# License: MIT
+
 # To install (as root):
 # cp sudoers-abuild-macos /etc/sudoers.d/
 # chown 600 /etc/sudoers.d/sudoers-abuild-macos

@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
+  Jenkins Swarm Client integration for NUT CI farm
+  Copyright (C)
+    2021-2026 by Jim Klimov <jimklimov+nut@gmail.com>
+  License: MIT
+
   MacOS launchd service manifest for Jenkins Swarm client (aiming for NUT CI farm)
 
   Inspired by:

@@ -2,7 +2,7 @@
 
 # Jenkins Swarm Client integration for NUT CI farm
 # Copyright (C)
-#   2021-2024 by Jim Klimov <jimklimov+nut@gmail.com>
+#   2021-2026 by Jim Klimov <jimklimov+nut@gmail.com>
 # License: MIT
 
 # Intended to be symlinked as

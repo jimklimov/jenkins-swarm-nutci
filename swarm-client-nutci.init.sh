@@ -3,6 +3,11 @@
 # chkconfig: - 70 40
 # description: Init-script for jenkins swarm client for NUT CI farm
 #
+# Jenkins Swarm Client integration for NUT CI farm
+# Copyright (C)
+#   2021-2026 by Jim Klimov <jimklimov+nut@gmail.com>
+# License: MIT
+#
 ### BEGIN INIT INFO
 # Provides: swarm_client_nutci
 # Required-Start: $network $remote_fs $syslog

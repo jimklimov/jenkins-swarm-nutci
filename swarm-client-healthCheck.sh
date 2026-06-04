@@ -5,7 +5,9 @@
 #   2021-2026 by Jim Klimov <jimklimov+nut@gmail.com>
 # License: MIT
 
-# Check what Jenkins controller thinks about this agent - is it known? online?
+# Check what Jenkins controller thinks about this agent -
+# is it known? online? ...known failed to launch?
+# See also jenkins-agent-toggle.sh
 
 SCRIPTDIR="`dirname \"$0\"`"
 SCRIPTDIR="`cd \"${SCRIPTDIR}\" && pwd`"

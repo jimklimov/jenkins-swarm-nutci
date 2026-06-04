@@ -150,14 +150,23 @@ toggle_off_on() {
 case "$1" in
     on|off|status|stop-graceful) ACTION="$1" ;;
     list) ACTION="$1" ; REGEX_DN='.*' ;;
+    status-all) ACTION="status" ; REGEX_DN='.*' ;;
     off-3h)  toggle_off_on 10800 ;;
     off-10h) toggle_off_on 24000 ;;
     off-1m|"test")  toggle_off_on 60 ;;
     -h|--help|help) cat << EOF
 $0 (on | off | off-1m [test] | off-3h | off-10h)
+    NOTE: 'off' means administrative offlining (any running jobs finish when
+          they do, new ones are not scheduled); agent JAR remains connected.
+
 $0 list
 $0 status
+$0 status-all
+
 $0 stop-graceful
+    Initiate administrative offlining and wait for REGEX_DN agent(s) to be
+    idle; only then exit this script (agent JAR remains connected - kill it
+    separately).
 EOF
         exit
         ;;
@@ -265,13 +274,35 @@ handle_action() {
             return
         fi
 
+        echo ""
         echo "=== Researching node: $NODE_NAME"
 
         NODE_INFO="$(curlcmd_crumb "$JENKINS_URL/computer/$NODE_NAME/api/json")"
         NODE_IDLE="$(echo "${NODE_INFO}" | jq ".idle")"
         NODE_OFFLINE="$(echo "${NODE_INFO}" | jq ".offline")"
+        NODE_OFFLINE_TEMP="$(echo "${NODE_INFO}" | jq ".temporarilyOffline")"
+        NODE_OFFLINE_CAUSE_CLASS="$(echo "${NODE_INFO}" | jq ".offlineCause._class")"
+        NODE_OFFLINE_CAUSE_REASON="$(echo "${NODE_INFO}" | jq ".offlineCauseReason")"
         echo "Node Idle State: $NODE_IDLE"
         echo "Node Offline State: $NODE_OFFLINE"
+        if [ x"$NODE_OFFLINE" = xtrue ] ; then
+            STR=""
+            if [ x"${NODE_OFFLINE_TEMP}" = xtrue ] ; then
+                STR="Offlined temporarily."
+            fi
+
+            if [ x"${NODE_OFFLINE_CAUSE_CLASS}" != xnull ] \
+            || [ x"${NODE_OFFLINE_CAUSE_REASON}" != xnull -a x"${NODE_OFFLINE_CAUSE_REASON}" != x'""' ] \
+            ; then
+                STR="${STR} Offline cause:"
+                [ x"${NODE_OFFLINE_CAUSE_CLASS}" = xnull ] || STR="${STR} ${NODE_OFFLINE_CAUSE_CLASS}"
+                [ x"${NODE_OFFLINE_CAUSE_REASON}" = xnull -o x"${NODE_OFFLINE_CAUSE_REASON}" = x'""' ] || STR="${STR} ${NODE_OFFLINE_CAUSE_REASON}"
+            fi
+
+            if [ -n "${STR}" ] ; then
+                echo "* ${STR}"
+            fi
+        fi
 
         if [ x"$ACTION" = xstop-graceful ] ; then
             if [ x"$NODE_OFFLINE" = xfalse ] ; then

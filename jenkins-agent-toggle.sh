@@ -253,6 +253,8 @@ FILTERED_NODE_LIST=""
 get_node_list() {
     [ -n "${JENKINS_CRUMB}" ] || get_crumb
 
+    # This should have all detailed info about all nodes,
+    # at least those visible to this account
     RAW_NODE_LIST="$(curlcmd_crumb "${JENKINS_URL}/computer/api/json?pretty=true")"
     [ -n "${RAW_NODE_LIST}" ] || die "Did not get RAW_NODE_LIST"
 
@@ -280,6 +282,8 @@ handle_action() {
         echo ""
         echo "=== Researching node: $NODE_NAME"
 
+        # FIXME: At least for the first round, it should suffice to parse
+        #  the RAW_NODE_LIST with jq, instead of querying the server again
         NODE_INFO="$(curlcmd_crumb "$JENKINS_URL/computer/$NODE_NAME/api/json")"
         NODE_IDLE="$(echo "${NODE_INFO}" | jq ".idle")"
         NODE_OFFLINE="$(echo "${NODE_INFO}" | jq ".offline")"
@@ -347,6 +351,9 @@ handle_action() {
             for NODE_NAME in $FILTERED_NODE_LIST ; do
                 echo "=== Waiting for node to be idle: $NODE_NAME"
 
+                # FIXME: Query for just the data points we parse?
+                #  (Do it once for all names in FILTERED_NODE_LIST?)
+                #  Less overheads all around...
                 NODE_INFO="$(curlcmd_crumb "$JENKINS_URL/computer/$NODE_NAME/api/json")"
                 NODE_IDLE="$(echo "${NODE_INFO}" | jq ".idle")"
                 NODE_OFFLINE="$(echo "${NODE_INFO}" | jq ".offline")"

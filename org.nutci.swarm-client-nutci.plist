@@ -48,9 +48,7 @@
 
     <key>ProgramArguments</key>
     <array>
-        <string>/bin/bash</string>
-        <string>-c</string>
-        <string>/Users/abuild/jenkins-swarm/swarm-client-download.sh &amp;&amp; /Users/abuild/jenkins-swarm/swarm-client-nutci.sh</string>
+        <string>/Users/abuild/jenkins-swarm/swarm-client-nutci.macos-homebrew.sh</string>
     </array>
 
 <!--
@@ -58,11 +56,9 @@
     <integer>3600</integer>
   -->
 
-    <!-- 0 = infinity... if we could wait gracefully -->
-<!--
+    <!-- 0 = infinity, so we could wait gracefully -->
     <key>ExitTimeOut</key>
     <integer>0</integer>
--->
 
     <key>RunAtLoad</key>
     <true />

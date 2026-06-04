@@ -79,7 +79,12 @@ read_configs_JSNyml_template() {
     VAL="`getval_JSNyml 'url' < \"$FILE\"`" && [ -n "$VAL" ] && JENKINS_URL="$VAL" || RES=1
 
     # This one is not likely in the template:
-    VAL="`getval_JSNyml 'name' < \"$FILE\" | tr '+' '.' | tr '|' '.' | tr '^' '.' | tr '$' '.'`" && [ -n "$VAL" ] && REGEX_DN="^$VAL"'$'
+    VAL="`getval_JSNyml 'name' < \"$FILE\" | tr '+' '.' | tr '|' '.' | tr '^' '.' | tr '$' '.'`" \
+    && [ -n "$VAL" ] && REGEX_DN="^$VAL"'$' \
+    || {
+        # Consider AGENT_NAME envvar that may be set for the swarm agent configs or exported otherwise
+        [ -n "${AGENT_NAME-}" ] && REGEX_DN="^${AGENT_NAME}"'$'
+    }
 
     return $RES
 }

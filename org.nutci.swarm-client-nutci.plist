@@ -12,6 +12,7 @@
   * https://somesh-rokz.medium.com/how-to-create-services-in-macos-using-bash-launchctl-and-plutil-commands-step-by-step-guide-d736d25cdeeb
   * https://serverfault.com/questions/194832/how-to-start-stop-restart-launchd-services-from-the-command-line
   * https://gist.github.com/johndturn/09a5c055e6a56ab61212204607940fa0
+  * https://www.manpagez.com/man/5/launchd.plist/
 
   * If you customize it, check with `plutil -lint swarm-client-nutci.plist`
   * Copy into system: `sudo cp org.nutci.swarm-client-nutci.plist /Library/LaunchDaemons/`
@@ -57,7 +58,22 @@
     <integer>3600</integer>
   -->
 
+    <!-- 0 = infinity... if we could wait gracefully -->
+<!--
+    <key>ExitTimeOut</key>
+    <integer>0</integer>
+-->
+
     <key>RunAtLoad</key>
     <true />
+
+    <key>KeepAlive</key>
+    <dict>
+        <!-- Only revive if crashed, not stopped purposefully -->
+        <SuccessfulExit>
+            <false />
+        </SuccessfulExit>
+    </dict>
+
   </dict>
 </plist>

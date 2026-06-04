@@ -11,6 +11,10 @@
 #
 # Requires common shell tools, `curl`, `jq`
 
+for T in jq curl ; do
+    command -v $T > /dev/null || exit
+done
+
 # May be specified by caller, prefer that
 # Use internal-scoped variable when we need to guess though
 _AGENT_NAME="${AGENT_NAME}"

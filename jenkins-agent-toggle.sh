@@ -289,9 +289,14 @@ cookie="`mktemp`" && [ -n "$cookie" ] || cookie="/tmp/cookie.$$"
 trap "rm $cookie ; EXIT_FLAG=true" 0 1 2 3 15
 
 do_curlcmd() {
-    # -L	Follow location redirections
     # -f	Return failed exit code upon HTTP-400 and higher codes
-    CURL_ARGS="-L -f"
+    CURL_ARGS="-f"
+
+    # -L	Follow location redirections (not for POST queries)
+    case x"$*" in
+        *XPOST*|*"X POST"*) ;;
+        *)  CURL_ARGS="${CURL_ARGS} -L" ;;
+    esac
 
     case x"${DEBUG}" in
         xtrue)  CURL_ARGS="${CURL_ARGS} -v" ;;

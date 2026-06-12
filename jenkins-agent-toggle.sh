@@ -276,7 +276,9 @@ cookie="`mktemp`" && [ -n "$cookie" ] || cookie="/tmp/cookie.$$"
 trap "rm $cookie ; EXIT_FLAG=true" 0 1 2 3 15
 
 do_curlcmd() {
-    CURL_ARGS="-L"
+    # -L	Follow location redirections
+    # -f	Return failed exit code upon HTTP-400 and higher codes
+    CURL_ARGS="-L -f"
 
     case x"${DEBUG}" in
         xtrue)  CURL_ARGS="${CURL_ARGS} -v" ;;
@@ -284,11 +286,18 @@ do_curlcmd() {
         x""|xfalse) CURL_ARGS="${CURL_ARGS} -s" ;;	# Actual default is quiet
     esac
 
+    CURL_RES=0
     if [ x"${DEBUG}" = xtrue ] ; then
-        ( set -x ; curl $CURL_ARGS -c "$cookie" -u "${J_USER}:${J_PASS}" "$@" )
+        ( set -x ; curl $CURL_ARGS -c "$cookie" -u "${J_USER}:${J_PASS}" "$@" ) || CURL_RES=$?
     else
-        curl $CURL_ARGS -c "$cookie" -u "${J_USER}:${J_PASS}" "$@"
+        curl $CURL_ARGS -c "$cookie" -u "${J_USER}:${J_PASS}" "$@" || CURL_RES=$?
     fi
+
+    if [ x"${CURL_RES}" != x0 ] ; then
+        echo "WARNING: curl call FAILED ($CURL_RES). If it is about 'HTTP-403 No valid crumb was included in the request' - check that your '${J_USER}' account has the needed permissions on Jenkins controller!" >&2
+    fi
+
+    return $CURL_RES
 }
 
 curlcmd() {

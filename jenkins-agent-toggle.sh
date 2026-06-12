@@ -230,7 +230,15 @@ cookie="`mktemp`" && [ -n "$cookie" ] || cookie="/tmp/cookie.$$"
 trap "rm $cookie ; EXIT_FLAG=true" 0 1 2 3 15
 
 do_curlcmd() {
-    curl -s -c "$cookie" -u "${J_USER}:${J_PASS}" "$@"
+    CURL_ARGS="-L"
+
+    case x"${DEBUG}" in
+        xtrue)  CURL_ARGS="${CURL_ARGS} -v" ;;
+        xlow)   ;;	# Default to middle verbosity = transfer stats
+        x""|xfalse) CURL_ARGS="${CURL_ARGS} -s" ;;	# Actual default is quiet
+    esac
+
+    curl $CURL_ARGS -c "$cookie" -u "${J_USER}:${J_PASS}" "$@"
 }
 
 curlcmd() {

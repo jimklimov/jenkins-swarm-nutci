@@ -27,9 +27,9 @@ _AGENT_NAME="${AGENT_NAME}"
 # May be configured below, or kept as is for typical nut-swarm use case:
 [ -n "${JRT_USER}" ] || JRT_USER="abuild"
 
-# Pick out matching "displayName" hits from current list of agents every time we run:
-#REGEX_DN='.*-rpiv'
-[ -n "${REGEX_DN-}" ] || REGEX_DN="^${_AGENT_NAME}"
+# Pick out matching "displayName" hits from current list of agents
+# every time we run a query. Example: REGEX_DN='.*-rpiv'
+[ -n "${REGEX_DN-}" ] || REGEX_DN="OPTIONALLY_CONFIGURE_THIS_REGEX_OR_IT_WILL_BE_DEFAULTED"
 
 ##########################################
 # Stuff to configure in the config file
@@ -72,28 +72,47 @@ read_configs_JSNyml_template() {
     FILE="${SCRIPTDIR}/jenkins-swarm-nutci.yml.in"
 
     RES=0
-    VAL="`getval_JSNyml 'passwordFile' < \"$FILE\"`" && [ -n "$VAL" ] && {
-        if [ -s "$VAL" ] ; then
-            J_PASS="`cat \"$VAL\"`" || RES=1
-        else
-            VAL="`echo \"$VAL\" | sed 's,@SCRIPTDIR@,'\"${SCRIPTDIR}\",`"
-            if [ -s "$VAL" ] ; then
-                J_PASS="`cat \"$VAL\"`" || RES=1
-            else
-                RES=1
-            fi
-        fi
-    }
-    VAL="`getval_JSNyml 'username' < \"$FILE\"`" && [ -n "$VAL" ] && J_USER="$VAL" || RES=1
-    VAL="`getval_JSNyml 'url' < \"$FILE\"`" && [ -n "$VAL" ] && JENKINS_URL="$VAL" || RES=1
 
-    # This one is not likely in the template:
-    VAL="`getval_JSNyml 'name' < \"$FILE\" | tr '+' '.' | tr '|' '.' | tr '^' '.' | tr '$' '.'`" \
-    && [ -n "$VAL" ] && REGEX_DN="^$VAL"'$' \
-    || {
-        # Consider AGENT_NAME envvar that may be set for the swarm agent configs or exported otherwise
-        [ -n "${AGENT_NAME-}" ] && REGEX_DN="^${AGENT_NAME}"'$'
-    }
+    case "${J_PASS}" in
+        *CONFIGURE_THIS*)
+            VAL="`getval_JSNyml 'passwordFile' < \"$FILE\"`" && [ -n "$VAL" ] && {
+                if [ -s "$VAL" ] ; then
+                    J_PASS="`cat \"$VAL\"`" || RES=1
+                else
+                    VAL="`echo \"$VAL\" | sed 's,@SCRIPTDIR@,'\"${SCRIPTDIR}\",`"
+                    if [ -s "$VAL" ] ; then
+                        J_PASS="`cat \"$VAL\"`" || RES=1
+                    else
+                        RES=1
+                    fi
+                fi
+            }
+        ;;
+    esac
+
+    case "${J_USER}" in
+        *CONFIGURE_THIS*)
+            VAL="`getval_JSNyml 'username' < \"$FILE\"`" && [ -n "$VAL" ] && J_USER="$VAL" || RES=1
+        ;;
+    esac
+
+    case "${JENKINS_URL}" in
+        *CONFIGURE_THIS*)
+            VAL="`getval_JSNyml 'url' < \"$FILE\"`" && [ -n "$VAL" ] && JENKINS_URL="$VAL" || RES=1
+        ;;
+    esac
+
+    case "${REGEX_DN}" in
+        *CONFIGURE_THIS*)
+            # This one is not likely in the template:
+            VAL="`getval_JSNyml 'name' < \"$FILE\" | tr '+' '.' | tr '|' '.' | tr '^' '.' | tr '$' '.'`" \
+            && [ -n "$VAL" ] && REGEX_DN="^$VAL"'$' \
+            || {
+                # Consider AGENT_NAME envvar that may be set for the swarm agent configs or exported otherwise
+                [ -n "${AGENT_NAME-}" ] && REGEX_DN="^${AGENT_NAME}"'$'
+            }
+        ;;
+    esac
 
     return $RES
 }
@@ -107,10 +126,29 @@ read_configs_JSNyml_per_agent() {
     }
 
     RES=0
-    VAL="`getval_JSNyml 'passwordFile' < \"$FILE\"`" && [ -n "$VAL" ] && [ -s "$VAL" ] && J_PASS="`cat \"$VAL\"`" || RES=1
-    VAL="`getval_JSNyml 'username' < \"$FILE\"`" && [ -n "$VAL" ] && J_USER="$VAL" || RES=1
-    VAL="`getval_JSNyml 'url' < \"$FILE\"`" && [ -n "$VAL" ] && JENKINS_URL="$VAL" || RES=1
-    VAL="`getval_JSNyml 'name' < \"$FILE\" | tr '+' '.' | tr '|' '.' | tr '^' '.' | tr '$' '.'`" && [ -n "$VAL" ] && REGEX_DN="^$VAL"'$' || RES=1
+    case "${J_PASS}" in
+        *CONFIGURE_THIS*)
+            VAL="`getval_JSNyml 'passwordFile' < \"$FILE\"`" && [ -n "$VAL" ] && [ -s "$VAL" ] && J_PASS="`cat \"$VAL\"`" || RES=1
+        ;;
+    esac
+
+    case "${J_USER}" in
+        *CONFIGURE_THIS*)
+            VAL="`getval_JSNyml 'username' < \"$FILE\"`" && [ -n "$VAL" ] && J_USER="$VAL" || RES=1
+        ;;
+    esac
+
+    case "${JENKINS_URL}" in
+        *CONFIGURE_THIS*)
+            VAL="`getval_JSNyml 'url' < \"$FILE\"`" && [ -n "$VAL" ] && JENKINS_URL="$VAL" || RES=1
+        ;;
+    esac
+
+    case "${REGEX_DN}" in
+        *CONFIGURE_THIS*)
+            VAL="`getval_JSNyml 'name' < \"$FILE\" | tr '+' '.' | tr '|' '.' | tr '^' '.' | tr '$' '.'`" && [ -n "$VAL" ] && REGEX_DN="^$VAL"'$' || RES=1
+        ;;
+    esac
 
     return $RES
 }
@@ -144,6 +182,12 @@ read_configs() {
     esac
 
     JENKINS_URL="`echo \"${JENKINS_URL}\" | sed 's,/*$,,'`"
+
+    case "${REGEX_DN}" in
+        *CONFIGURE_THIS*)
+            REGEX_DN="^${_AGENT_NAME}"
+        ;;
+    esac
 
     return 0
 }

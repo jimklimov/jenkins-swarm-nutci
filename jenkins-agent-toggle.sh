@@ -143,6 +143,8 @@ read_configs() {
         *CONFIGURE_THIS*) die "Some critical parameters remain not set" ;;
     esac
 
+    JENKINS_URL="`echo \"${JENKINS_URL}\" | sed 's,/*$,,'`"
+
     return 0
 }
 

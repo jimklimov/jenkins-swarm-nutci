@@ -268,6 +268,8 @@ get_crumb() {
 RAW_NODE_LIST=""
 FILTERED_NODE_LIST=""
 get_node_list() {
+    echo "... Getting Jenkins list of nodes which match regex '${REGEX_DN}'"
+
     [ -n "${JENKINS_CRUMB}" ] || get_crumb
 
     # This should have all detailed info about all nodes,

@@ -114,6 +114,7 @@ read_configs_JSNyml_template() {
         ;;
     esac
 
+    echo "Applied configuration from $FILE" >&2
     return $RES
 }
 
@@ -150,28 +151,40 @@ read_configs_JSNyml_per_agent() {
         ;;
     esac
 
+    echo "Applied configuration from $FILE" >&2
     return $RES
 }
 
 read_configs_JATconf() {
-    for F in \
+    for FILE in \
         "${SCRIPTDIR}/jenkins-agent-toggle.conf" \
         "${HOME}/.jenkins-agent-toggle.conf" \
         "${HOME}/.config/jenkins-agent-toggle.conf" \
-        die \
     ; do
-        [ "$F" = die ] && die "Could not source config from any tried location"
-        if [ -s "$F" ] ; then
-            . "$F" || die "Could not source config from $F"
-            break
+        if [ -s "$FILE" ] ; then
+            . "$FILE" || die "Could not source config from $FILE"
+            echo "Applied configuration from $FILE" >&2
+            return 0
         fi
     done
+
+    echo "WARNING: Could not source a jenkins-agent-toggle.conf from any tried location" >&2
+    return 1
 }
 
 do_read_configs() {
-    read_configs_JSNyml_per_agent && return
-    read_configs_JSNyml_template && return
-    read_configs_JATconf
+    # NOTE: We start with jenkins-agent-toggle.conf files
+    #  because they can point to a different user account
+    #  (higher privileged) than what swarm agents use.
+    #  Account for swarm agents suffices to create/destroy
+    #  them only, and a separate admin account may manage
+    #  *other* agent states and metadata.
+    for METHOD in read_configs_JATconf read_configs_JSNyml_per_agent read_configs_JSNyml_template ; do
+        case "${JENKINS_URL}${J_USER}${J_PASS}${REGEX_DN}" in
+            *CONFIGURE_THIS*) ${METHOD} ;;
+            *) echo "We have all the required configuration, not looking at other sources" >&2; return 0 ;;
+        esac
+    done
 }
 
 read_configs() {

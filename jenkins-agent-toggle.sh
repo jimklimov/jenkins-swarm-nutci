@@ -240,7 +240,11 @@ do_curlcmd() {
         x""|xfalse) CURL_ARGS="${CURL_ARGS} -s" ;;	# Actual default is quiet
     esac
 
-    curl $CURL_ARGS -c "$cookie" -u "${J_USER}:${J_PASS}" "$@"
+    if [ x"${DEBUG}" = xtrue ] ; then
+        ( set -x ; curl $CURL_ARGS -c "$cookie" -u "${J_USER}:${J_PASS}" "$@" )
+    else
+        curl $CURL_ARGS -c "$cookie" -u "${J_USER}:${J_PASS}" "$@"
+    fi
 }
 
 curlcmd() {

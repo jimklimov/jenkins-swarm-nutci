@@ -299,16 +299,18 @@ do_curlcmd() {
     esac
 
     case x"${DEBUG}" in
-        xtrue)  CURL_ARGS="${CURL_ARGS} -v" ;;
+        xtrue)  CURL_ARGS="${CURL_ARGS} -v"
+            { echo "=== COOKIE JAR: $cookie" ; cat "$cookie" ; } >&2
+            ;;
         xlow)   ;;	# Default to middle verbosity = transfer stats
         x""|xfalse) CURL_ARGS="${CURL_ARGS} -s" ;;	# Actual default is quiet
     esac
 
     CURL_RES=0
     if [ x"${DEBUG}" = xtrue ] ; then
-        ( set -x ; curl $CURL_ARGS -c "$cookie" -u "${J_USER}:${J_PASS}" "$@" ) || CURL_RES=$?
+        ( set -x ; curl $CURL_ARGS -b "$cookie" -c "$cookie" -u "${J_USER}:${J_PASS}" "$@" ) || CURL_RES=$?
     else
-        curl $CURL_ARGS -c "$cookie" -u "${J_USER}:${J_PASS}" "$@" || CURL_RES=$?
+        curl $CURL_ARGS -b "$cookie" -c "$cookie" -u "${J_USER}:${J_PASS}" "$@" || CURL_RES=$?
     fi
 
     if [ x"${CURL_RES}" != x0 ] ; then

@@ -329,7 +329,7 @@ curlcmd() {
 }
 
 curlcmd_crumb() {
-    curlcmd -H "Jenkins-Crumb:${JENKINS_CRUMB}" "$@"
+    curlcmd -H "${JENKINS_CRUMB_FIELD}:${JENKINS_CRUMB}" "$@"
 }
 
 curlcmd_crumb_POST() {
@@ -337,11 +337,15 @@ curlcmd_crumb_POST() {
 }
 
 JENKINS_CRUMB=""
+JENKINS_CRUMB_FIELD="Jenkins-Crumb"
 get_crumb() {
     echo "=== Getting Jenkins CSFR Token"
-    JENKINS_CRUMB="$(curlcmd "${JENKINS_URL}/crumbIssuer/api/json" | jq -r '.crumb')"
+    OUT="$(curlcmd "${JENKINS_URL}/crumbIssuer/api/json")" && \
+    JENKINS_CRUMB="$(echo "${OUT}" | jq -r '.crumb')"
     echo "===== CSFR Token: $JENKINS_CRUMB"
     [ -n "${JENKINS_CRUMB}" ] || die "Did not get JENKINS_CRUMB"
+
+    VAL="$(echo "${OUT}" | jq -r '.crumbRequestField')" && [ -n "${VAL}" ] && JENKINS_CRUMB_FIELD="${VAL}"
 }
 
 RAW_NODE_LIST=""

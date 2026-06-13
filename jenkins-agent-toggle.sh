@@ -38,7 +38,7 @@ _AGENT_NAME="${AGENT_NAME}"
 # Your Jenkins instance
 [ -n "${JENKINS_URL-}" ] || JENKINS_URL="https://CONFIGURE_THIS_URL"
 
-# Your user (to run admin commands as)
+# Your user (to run admin commands as); the swarm account should suffice here
 [ -n "${J_USER-}" ] || J_USER="CONFIGURE_THIS_jadmin"
 # Generate a User Token from Jenkins account properties, put it here
 [ -n "${J_PASS-}" ] || J_PASS="CONFIGURE_THIS_123hex"

@@ -40,12 +40,5 @@ Jenkins controller) can be used to automate processes around agent life
 cycle (e.g. to offline the agent logically and wait for actual builds to
 complete before disconnecting it, when we want to shut down gracefully).
 
-NOTE: This may want a `jenkins-agent-toggle.conf` file pointing to a
-sufficiently privileged admin account `J_USER` (with its `J_PASS` token).
-By default the account used for swarm agents is used, but for their work
-it suffices to have permissions to create, configure and delete an agent,
-but not necessarily to manipulate its metadata or live state (the Connect
-and/or Disconnect permissions).
-
 This is further wrapped by `swarm-client-nutci-stop.sh` to coordinate
 finishing the jobs and killing the agent process gracefully.

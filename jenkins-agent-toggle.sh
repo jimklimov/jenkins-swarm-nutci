@@ -210,10 +210,36 @@ read_configs
 toggle_off_on() {
     echo "=== `date -u`: Toggling off for now..."
     "$0" off
+    echo "=== `date -u`: Querying resulting status"
+    "$0" status
     echo "=== `date -u`: Sleeping $1 seconds to toggle back on..."
     sleep $1
     echo "=== `date -u`: Toggling back on"
     "$0" on
+    echo "=== `date -u`: Querying resulting status"
+    "$0" status
+    echo "=== `date -u`: done"
+    exit
+}
+
+toggle_on_status() {
+    echo "=== `date -u`: Toggling back on"
+    "$0" on
+    echo "=== `date -u`: Sleeping $1 seconds to query status..."
+    sleep $1
+    echo "=== `date -u`: Querying resulting status"
+    "$0" status
+    echo "=== `date -u`: done"
+    exit
+}
+
+toggle_off_status() {
+    echo "=== `date -u`: Toggling off"
+    "$0" off
+    echo "=== `date -u`: Sleeping $1 seconds to query status..."
+    sleep $1
+    echo "=== `date -u`: Querying resulting status"
+    "$0" status
     echo "=== `date -u`: done"
     exit
 }
@@ -222,6 +248,8 @@ case "$1" in
     on|off|status|stop-graceful) ACTION="$1" ;;
     list) ACTION="$1" ; REGEX_DN='.*' ;;
     status-all) ACTION="status" ; REGEX_DN='.*' ;;
+    on-status) toggle_on_status 5 ;;
+    off-status) toggle_off_status 5 ;;
     off-3h)  toggle_off_on 10800 ;;
     off-10h) toggle_off_on 24000 ;;
     off-1m|"test")  toggle_off_on 60 ;;

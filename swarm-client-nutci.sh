@@ -134,5 +134,8 @@ cat "jenkins-swarm.labels" || true
 
 echo "=== Launching Java for ${PREFERJAR}:"
 set -x
-exec java -jar "${PREFERJAR}" \
+
+# NOTE: JAVA_OPTS set in $AGENT_DIR/jenkins-swarm-prestart.include-early
+#  can be used to convey system-specific options like a trusted `cacerts`:
+exec java $JAVA_OPTS -jar "${PREFERJAR}" \
 	-config "jenkins-swarm.yml"

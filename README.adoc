@@ -15,7 +15,8 @@ to participate in, such as the NUT CI farm.
 
 While this particular repository is maintained with the NUT CI farm in
 mind, no specific configuration is stored here. Direct use or forks are
-welcome with other FOSS projects.
+welcome with other FOSS projects (you might want to customize file names,
+especially if different default user accounts are used, or let them be).
 
 While this project is provided under the terms of MIT license (same as
 Jenkins itself) and can be re-used in other efforts without practical
@@ -34,6 +35,9 @@ Numerous integration files (init scripts, systemd units, etc.) for different
 platforms are provided. See comments in them about installation into the
 system to start the Jenkins Swarm agent as a service (with automatic update
 of the JAR before each start-up).
+
+NOTE: `JAVA_OPTS` set in `$AGENT_DIR/jenkins-swarm-prestart.include-early`
+can be used to convey system-specific options like a trusted `cacerts` file.
 
 The `jenkins-agent-toggle.sh` (with its own configuration to access the
 Jenkins controller) can be used to automate processes around agent life

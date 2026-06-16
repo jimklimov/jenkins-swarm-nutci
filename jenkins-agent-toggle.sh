@@ -365,7 +365,7 @@ if [ -n "${CACERTS_PEM_BASENAME}" ] ; then
     fi
 
     if [ -s "${CACERTS_PEM}" ] ; then
-        CURL_ARGS_DEFAULT="${CURL_ARGS_DEFAULT} --cacert '${CACERTS_PEM}'"
+        CURL_ARGS_DEFAULT="${CURL_ARGS_DEFAULT} --cacert ${CACERTS_PEM}"
     fi
 fi
 

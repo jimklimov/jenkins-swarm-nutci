@@ -64,8 +64,8 @@ if [ -n "${CACERTS_PEM_BASENAME}" ] ; then
 	fi
 
 	if [ -s "${CACERTS_PEM_BASENAME}" ] ; then
-		CURL_OPTS="${CURL_OPTS} --cacert '${CACERTS_PEM}'"
-		WGET_OPTS="${WGET_OPTS} --ca-certificate='${CACERTS_PEM}'"
+		CURL_OPTS="${CURL_OPTS} --cacert ${CACERTS_PEM}"
+		WGET_OPTS="${WGET_OPTS} --ca-certificate=${CACERTS_PEM}"
 	fi
 fi
 

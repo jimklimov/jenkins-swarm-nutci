@@ -44,6 +44,12 @@ _AGENT_NAME="${AGENT_NAME}"
 [ -n "${J_PASS-}" ] || J_PASS="CONFIGURE_THIS_123hex"
 
 ##########################################
+# Stuff for possible deployment-specific call wrappers to set (e.g. not a NUT CI farm)
+
+# This may refer to a .in file in SCRIPTDIR or a file in AGENT_DIR:
+[ -n "${JSN_YML_TEMPLATE_BASENAME-}" ] || JSN_YML_TEMPLATE_BASENAME="jenkins-swarm-nutci.yml"
+#[ -n "${JSN_YML_TOKEN_BASENAME-}" ] || JSN_YML_TOKEN_BASENAME="jenkins-swarm-nutci.token"
+##########################################
 
 LANG=C
 LC_ALL=C
@@ -67,9 +73,10 @@ getval_JSNyml() {
 }
 
 read_configs_JSNyml_template() {
-    [ -s "${SCRIPTDIR}/jenkins-swarm-nutci.yml.in" -a -s "${SCRIPTDIR}/jenkins-swarm-nutci.token" ] || return
+    [ -s "${SCRIPTDIR}/${JSN_YML_TEMPLATE_BASENAME}.in" ] || return
+    ### [ -s "${SCRIPTDIR}/${JSN_YML_TOKEN_BASENAME}" ] || return
 
-    FILE="${SCRIPTDIR}/jenkins-swarm-nutci.yml.in"
+    FILE="${SCRIPTDIR}/${JSN_YML_TEMPLATE_BASENAME}.in"
 
     RES=0
 
@@ -83,6 +90,7 @@ read_configs_JSNyml_template() {
                     if [ -s "$VAL" ] ; then
                         J_PASS="`cat \"$VAL\"`" || RES=1
                     else
+                        echo "WARNING: Referenced token file '${VAL}' does not exist" >&2
                         RES=1
                     fi
                 fi
@@ -119,17 +127,25 @@ read_configs_JSNyml_template() {
 }
 
 read_configs_JSNyml_per_agent() {
-    [ -s "`pwd`/jenkins-swarm-nutci.yml" ] && FILE="`pwd`/jenkins-swarm-nutci.yml" \
+    [ -s "`pwd`/${JSN_YML_TEMPLATE_BASENAME}" ] && FILE="`pwd`/${JSN_YML_TEMPLATE_BASENAME}" \
     || {
-        [ -s "${SCRIPTDIR}/../jenkins-${_AGENT_NAME}/jenkins-swarm-nutci.yml" ] \
-        && FILE="${SCRIPTDIR}/../jenkins-${_AGENT_NAME}/jenkins-swarm-nutci.yml" \
+        [ -s "${SCRIPTDIR}/../jenkins-${_AGENT_NAME}/${JSN_YML_TEMPLATE_BASENAME}" ] \
+        && FILE="${SCRIPTDIR}/../jenkins-${_AGENT_NAME}/${JSN_YML_TEMPLATE_BASENAME}" \
         || return
     }
 
     RES=0
     case "${J_PASS}" in
         *CONFIGURE_THIS*)
-            VAL="`getval_JSNyml 'passwordFile' < \"$FILE\"`" && [ -n "$VAL" ] && [ -s "$VAL" ] && J_PASS="`cat \"$VAL\"`" || RES=1
+            VAL="`getval_JSNyml 'passwordFile' < \"$FILE\"`" && [ -n "$VAL" ] \
+            && {
+                if [ -s "$VAL" ] ; then
+                    J_PASS="`cat \"$VAL\"`" || RES=1
+                else
+                    echo "WARNING: Referenced token file '${VAL}' does not exist" >&2
+                    RES=1
+                fi
+            }
         ;;
     esac
 

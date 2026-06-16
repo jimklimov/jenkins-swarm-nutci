@@ -42,6 +42,7 @@ SCRIPTDIR="`cd \"${SCRIPTDIR}\" && pwd`"
 [ -n "${AGENT_DIR-}" ] || AGENT_DIR="${SCRIPTDIR}/../jenkins-${AGENT_NAME}/"
 
 cd "${AGENT_DIR}" || exit
+export AGENT_NAME AGENT_DIR
 
 if [ -s ./jenkins-swarm-prestart.include-early ] ; then
 	# e.g. source some custom AGENT_NAME, custom PATH to GNU toolkit, etc.
@@ -50,6 +51,15 @@ if [ -s ./jenkins-swarm-prestart.include-early ] ; then
 else
 	echo "NOT SOURCING `pwd`/jenkins-swarm-prestart.include-early (absent or empty)"
 fi
+
+# Optional private CA collection
+# * For Java:
+[ -n "${CACERTS_JKS_BASENAME}" ] || CACERTS_JKS_BASENAME="jenkins-swarm.cacerts.jks"
+[ -n "${CACERTS_JKS_PASSWORD}" ] || CACERTS_JKS_PASSWORD="changeit"
+# * For Curl:
+[ -n "${CACERTS_PEM_BASENAME}" ] || CACERTS_PEM_BASENAME="jenkins-swarm.cacerts.pem"
+
+export CACERTS_JKS_BASENAME CACERTS_JKS_PASSWORD CACERTS_PEM_BASENAME
 
 if [ -z "$USER" ] ; then
 	USER="`id -u`" && [ -n "$USER" ] || USER=abuild
@@ -134,6 +144,22 @@ cat "jenkins-swarm.labels" || true
 
 echo "=== Launching Java for ${PREFERJAR}:"
 set -x
+
+case x"${JAVA_OPTS-}" in
+	x*-Djavax.net.ssl.trustStore*) ;;	# Set in some conf file
+	*)
+		if [ -n "${CACERTS_JKS_BASENAME}" ] ; then
+			CACERTS_JKS="${SCRIPTDIR}/${CACERTS_JKS_BASENAME}"
+			if [ -n "${AGENT_DIR}" ] && [ -s "${AGENT_DIR}/${CACERTS_JKS_BASENAME}" ] ; then
+				CACERTS_JKS="${AGENT_DIR}/${CACERTS_JKS_BASENAME}"
+			fi
+
+			if [ -s "${CACERTS_JKS}" ] ; then
+				JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=${CACERTS_JKS} -Djavax.net.ssl.trustStorePassword=${CACERTS_JKS_PASSWORD}"
+			fi
+		fi
+		;;
+esac
 
 # NOTE: JAVA_OPTS set in $AGENT_DIR/jenkins-swarm-prestart.include-early
 #  can be used to convey system-specific options like a trusted `cacerts`:

@@ -49,6 +49,12 @@ _AGENT_NAME="${AGENT_NAME}"
 # This may refer to a .in file in SCRIPTDIR or a file in AGENT_DIR:
 [ -n "${JSN_YML_TEMPLATE_BASENAME-}" ] || JSN_YML_TEMPLATE_BASENAME="jenkins-swarm-nutci.yml"
 #[ -n "${JSN_YML_TOKEN_BASENAME-}" ] || JSN_YML_TOKEN_BASENAME="jenkins-swarm-nutci.token"
+
+# Optional private CA collection
+# * For Java:
+[ -n "${CACERTS_JKS_BASENAME}" ] || CACERTS_JKS_BASENAME="jenkins-swarm.cacerts.jks"
+# * For Curl:
+[ -n "${CACERTS_PEM_BASENAME}" ] || CACERTS_PEM_BASENAME="jenkins-swarm.cacerts.pem"
 ##########################################
 
 LANG=C
@@ -67,6 +73,11 @@ SCRIPTDIR="`dirname "$0"`"
 if [ -n "${SCRIPTDIR}" ] ; then
     D="`cd \"${SCRIPTDIR}\" && pwd`" && [ -n "$D" ] && SCRIPTDIR="$D"
 fi
+
+# May be specified by caller, prefer that
+# Use internal-scoped variable when we need to guess though
+_AGENT_DIR="${AGENT_DIR}"
+[ -n "${_AGENT_DIR-}" ] || _AGENT_DIR="${SCRIPTDIR}/../jenkins-${_AGENT_NAME}/"
 
 getval_JSNyml() {
     grep -E '^ *'"$1"': ' | sed -e 's,^ *'"$1"': *,,' -e 's/^"\(.*\)"$/\1/' -e 's/^'"'"'\(.*\)'"'"'$/\1/'
@@ -129,9 +140,13 @@ read_configs_JSNyml_template() {
 read_configs_JSNyml_per_agent() {
     [ -s "`pwd`/${JSN_YML_TEMPLATE_BASENAME}" ] && FILE="`pwd`/${JSN_YML_TEMPLATE_BASENAME}" \
     || {
-        [ -s "${SCRIPTDIR}/../jenkins-${_AGENT_NAME}/${JSN_YML_TEMPLATE_BASENAME}" ] \
-        && FILE="${SCRIPTDIR}/../jenkins-${_AGENT_NAME}/${JSN_YML_TEMPLATE_BASENAME}" \
-        || return
+        [ -s "${_AGENT_DIR}/${JSN_YML_TEMPLATE_BASENAME}" ] \
+        && FILE="${_AGENT_DIR}/${JSN_YML_TEMPLATE_BASENAME}" \
+        || {
+            [ -s "${SCRIPTDIR}/../jenkins-${_AGENT_NAME}/${JSN_YML_TEMPLATE_BASENAME}" ] \
+            && FILE="${SCRIPTDIR}/../jenkins-${_AGENT_NAME}/${JSN_YML_TEMPLATE_BASENAME}" \
+            || return
+        }
     }
 
     RES=0
@@ -332,9 +347,30 @@ EXIT_FLAG=false
 cookie="`mktemp`" && [ -n "$cookie" ] || cookie="/tmp/cookie.$$"
 trap "rm $cookie ; EXIT_FLAG=true" 0 1 2 3 15
 
+### Set default curl options, to be used for every call:
+# -f	Return failed exit code upon HTTP-400 and higher codes
+CURL_ARGS_DEFAULT="-f"
+
+case x"${DEBUG}" in
+    xtrue)  CURL_ARGS_DEFAULT="${CURL_ARGS_DEFAULT} -v" ;;
+    xlow)   ;;	# Default to middle verbosity = transfer stats
+    x""|xfalse) CURL_ARGS_DEFAULT="${CURL_ARGS_DEFAULT} -s" ;;	# Actual default is quiet
+esac
+
+
+if [ -n "${CACERTS_PEM_BASENAME}" ] ; then
+    CACERTS_PEM="${SCRIPTDIR}/${CACERTS_PEM_BASENAME}"
+    if [ -n "${_AGENT_DIR}" ] && [ -s "${_AGENT_DIR}/${CACERTS_PEM_BASENAME}" ] ; then
+        CACERTS_PEM="${_AGENT_DIR}/${CACERTS_PEM_BASENAME}"
+    fi
+
+    if [ -s "${CACERTS_PEM}" ] ; then
+        CURL_ARGS_DEFAULT="${CURL_ARGS_DEFAULT} --cacert '${CACERTS_PEM}'"
+    fi
+fi
+
 do_curlcmd() {
-    # -f	Return failed exit code upon HTTP-400 and higher codes
-    CURL_ARGS="-f"
+    CURL_ARGS="${CURL_ARGS_DEFAULT}"
 
     # -L	Follow location redirections (not for POST queries)
     case x"$*" in
@@ -342,16 +378,9 @@ do_curlcmd() {
         *)  CURL_ARGS="${CURL_ARGS} -L" ;;
     esac
 
-    case x"${DEBUG}" in
-        xtrue)  CURL_ARGS="${CURL_ARGS} -v"
-            { echo "=== COOKIE JAR: $cookie" ; cat "$cookie" ; } >&2
-            ;;
-        xlow)   ;;	# Default to middle verbosity = transfer stats
-        x""|xfalse) CURL_ARGS="${CURL_ARGS} -s" ;;	# Actual default is quiet
-    esac
-
     CURL_RES=0
     if [ x"${DEBUG}" = xtrue ] ; then
+        { echo "=== COOKIE JAR: $cookie" ; cat "$cookie" ; } >&2 || true
         ( set -x ; curl $CURL_ARGS -b "$cookie" -c "$cookie" -u "${J_USER}:${J_PASS}" "$@" ) || CURL_RES=$?
     else
         curl $CURL_ARGS -b "$cookie" -c "$cookie" -u "${J_USER}:${J_PASS}" "$@" || CURL_RES=$?

@@ -37,7 +37,9 @@ system to start the Jenkins Swarm agent as a service (with automatic update
 of the JAR before each start-up).
 
 NOTE: `JAVA_OPTS` set in `$AGENT_DIR/jenkins-swarm-prestart.include-early`
-can be used to convey system-specific options like a trusted `cacerts` file.
+can be used to convey system-specific options like memory limits or agent
+logging bump. A trusted `cacerts` file can be picked up by merely existing
+with an expected file name.
 
 The `jenkins-agent-toggle.sh` (with its own configuration to access the
 Jenkins controller) can be used to automate processes around agent life

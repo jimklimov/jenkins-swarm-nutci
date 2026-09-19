@@ -28,6 +28,8 @@ User=abuild
 ExecStartPre=-/home/abuild/jenkins-swarm/swarm-client-download.sh
 ExecStart=/home/abuild/jenkins-swarm/swarm-client-nutci.sh
 ExecStop=/home/abuild/jenkins-swarm/swarm-client-nutci-stop.sh stop
+# Running builds may take a while to stop
+TimeoutStopSec=7200
 #Nice=15
 
 [Install]

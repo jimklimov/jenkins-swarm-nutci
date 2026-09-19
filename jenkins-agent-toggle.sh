@@ -12,7 +12,7 @@
 # Requires common shell tools, `curl`, `jq`
 
 for T in jq curl ; do
-    command -v $T > /dev/null || exit
+    command -v $T > /dev/null || { echo "FATAL: $0: missing required tool: $T" >&2; exit 1; }
 done
 
 # May be specified by caller, prefer that

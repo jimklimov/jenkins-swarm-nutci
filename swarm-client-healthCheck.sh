@@ -16,7 +16,8 @@ SCRIPTDIR="`cd \"${SCRIPTDIR}\" && pwd`"
 
 cd "${SCRIPTDIR}/../jenkins-${AGENT_NAME}/" || exit
 
-( command -v curl || command -v wget ) >/dev/null 2>&1 || exit
+( command -v curl || command -v wget ) >/dev/null 2>&1 \
+|| { echo "FATAL: $0: missing required tool: curl or wget" >&2; exit 1; }
 
 JENKINS_URL="`grep -E '^url:' jenkins-swarm.yml | awk '{print $NF}' | sed -e 's,^\"\(.*\)\"$,\1,' -e 's,/*$,,'`"
 # Hopefully same as AGENT_NAME:

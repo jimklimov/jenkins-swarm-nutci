@@ -93,8 +93,11 @@ rc_stop() {
 
 	export daemon_user
 	/home/abuild/jenkins-swarm/swarm-client-nutci-stop.sh stop 2>&1 | tee -a /var/log/swarm-client-nutci
+	kill -15 `rc_check` 2>&1 | tee -a /var/log/swarm-client-nutci
 
 	while test -n "`rc_check`" ; do sleep 2 ; done
+
+	echo "`date`: Stopped $0" >> /var/log/swarm-client-nutci
 	return 0
 }
 

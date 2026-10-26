@@ -56,7 +56,7 @@ stop_graceful() {
 }
 
 list_agent_pids() {
-    (ps -ef || ps -xawwu) 2>/dev/null | grep java | grep swarm-client | grep -v grep | grep -w "${JRT_USER}" | awk '{print $2}'
+    (ps -ef ; ps -xawwu) 2>/dev/null | grep java | grep swarm-client | grep -v grep | grep -w "${JRT_USER}" | awk '{print $2}'
 }
 
 kill_agent() {

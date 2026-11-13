@@ -187,7 +187,10 @@ read_configs_JSNyml_per_agent() {
 }
 
 read_configs_JATconf() {
+    # Load ONE configuration file, first seen in the order below.
+    # NOTE: If you want to chain-load files, use sourcing inside them.
     for FILE in \
+        "${_AGENT_DIR}/jenkins-agent-toggle.conf" \
         "${SCRIPTDIR}/jenkins-agent-toggle.conf" \
         "${HOME}/.jenkins-agent-toggle.conf" \
         "${HOME}/.config/jenkins-agent-toggle.conf" \

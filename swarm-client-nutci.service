@@ -25,6 +25,11 @@ After=network.service networking.service
 [Service]
 Restart=always
 User=abuild
+# Hold (re)start while apt/dpkg is busy, so a burst of package-triggered
+# restarts collapses into one real stop at the first and one real start
+# after the last. Prefixed by a plus to run fuser as root.
+TimeoutStartSec=45min
+ExecStartPre=+/home/abuild/jenkins-swarm/swarm-client-wait-pkgmgr.sh
 ExecStartPre=-/home/abuild/jenkins-swarm/swarm-client-download.sh
 ExecStart=/home/abuild/jenkins-swarm/swarm-client-nutci.sh
 ExecStop=/home/abuild/jenkins-swarm/swarm-client-nutci-stop.sh stop

@@ -32,9 +32,14 @@ TimeoutStartSec=45min
 ExecStartPre=+/home/abuild/jenkins-swarm/swarm-client-wait-pkgmgr.sh
 ExecStartPre=-/home/abuild/jenkins-swarm/swarm-client-download.sh
 ExecStart=/home/abuild/jenkins-swarm/swarm-client-nutci.sh
+# Running builds may take a while to stop. Allow them to finish
+# before the service stops - avoid killing via systemd default
+# timeout (90s). Consider overriding with a drop-in for finite
+# time that would match stalled builds for your project and worker:
+TimeoutStopSec=infinity
+#TimeoutStopSec=7200
 ExecStop=/home/abuild/jenkins-swarm/swarm-client-nutci-stop.sh stop
-# Running builds may take a while to stop
-TimeoutStopSec=7200
+# See above about tweaking this as a site-specific drop-in:
 #Nice=15
 
 [Install]

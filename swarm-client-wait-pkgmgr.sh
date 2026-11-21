@@ -62,5 +62,15 @@ busy_flock() {  # held-lock files: dpkg/apt, rpm
 
 busy() { busy_unit || busy_pidfile || busy_lockfile || busy_flock; }
 
+START="`LANG=C LC_ALL=C TZ=UTC date`" || START=1
 while busy; do sleep 5; done
-sleep "$SETTLE"
+FINISH="`LANG=C LC_ALL=C TZ=UTC date`" || FINISH=2
+
+# NOTE: This might sometimes delay because the second flipped,
+#  while there was nothing to do - oh well...
+if [ x"$START" = x"$FINISH" ] ; then
+    echo "Package management activities not detected, not delaying" >&2
+else
+    echo "Package management activities no longer detected, sleeping $SETTLE sec to settle" >&2
+    sleep "$SETTLE"
+fi

@@ -25,6 +25,8 @@ After=network.service networking.service
 [Service]
 Restart=always
 User=abuild
+# For non-default user names, it is easier that scripts know them right:
+#Environment=JRT_USER=abuild
 # Hold (re)start while apt/dpkg is busy, so a burst of package-triggered
 # restarts collapses into one real stop at the first and one real start
 # after the last. Prefixed by a plus to run fuser as root.
